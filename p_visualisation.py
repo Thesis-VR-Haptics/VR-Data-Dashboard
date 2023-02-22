@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
+    print("Testing GIT")
     o_db = pd.read_csv("oculus_data_csv.csv")
 
     # Visualise movement in 3D
