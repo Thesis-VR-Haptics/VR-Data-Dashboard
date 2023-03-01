@@ -7,7 +7,8 @@ import scipy.fftpack
 from Visualizer import Visualizer
 
 if __name__ == '__main__':
-    visualizer = Visualizer("QuestController_5946284.csv")
+    visualizer = Visualizer("QuestController_still.csv")
+    visualizer.applyMovingAvg()
     visualizer.visualize3D()
     visualizer.visualizeHand(True) # True als ge rechts wilt visualizeren
     plt.show()

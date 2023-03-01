@@ -3,10 +3,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.fftpack
-import Visualizer
+from Visualizer import Visualizer
 
 if __name__ == '__main__':
-    visualizer = Visualizer("QuestController_5946284.csv")
+    visualizer = Visualizer("QuestController_still.csv")
     visualizer.visualize3D()
     visualizer.visualizeHand(True)
     plt.show()

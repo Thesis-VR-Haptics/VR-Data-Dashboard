@@ -22,8 +22,6 @@ class Visualizer():
         ax.set_ylabel('y')
         ax.set_zlabel('z')
 
-        fig_l = plt.figure()
-        ax = plt.axes(projection='3d')
         ax.scatter3D(self.x_axis_l, self.y_axis_l, self.z_axis_l)
         ax.set_xlabel('x')
         ax.set_ylabel('y')
@@ -82,3 +80,30 @@ class Visualizer():
         plt.plot(time, acceleration_vector, "o", markersize=1)
         plt.ylabel("Acceleration (?)")
         plt.xlabel("Time (ms)")
+
+    def applyMovingAvg(self, window = 3):
+        self.x_axis_r = np.convolve(self.x_axis_r, np.ones(window),'valid')/window
+        for x in range(window-1):
+            self.x_axis_r = np.append(self.x_axis_r, 0)
+
+        self.y_axis_r = np.convolve(self.y_axis_r, np.ones(window), 'valid') / window
+        for x in range(window-1):
+            self.y_axis_r = np.append(self.y_axis_r, 0)
+
+        self.z_axis_r = np.convolve(self.z_axis_r, np.ones(window), 'valid') / window
+        for x in range(window-1):
+            self.z_axis_r = np.append(self.z_axis_r, 0)
+
+        self.x_axis_l = np.convolve(self.x_axis_l, np.ones(window), 'valid') / window
+        for x in range(window-1):
+            self.x_axis_l = np.append(self.x_axis_l, 0)
+
+        self.y_axis_l = np.convolve(self.y_axis_l, np.ones(window), 'valid') / window
+        for x in range(window-1):
+            self.y_axis_l = np.append(self.y_axis_l, 0)
+
+        self.z_axis_l = np.convolve(self.z_axis_l, np.ones(window), 'valid') / window
+        for x in range(window-1):
+            self.z_axis_l = np.append(self.z_axis_l, 0)
+            
+        
