@@ -2,14 +2,17 @@ import math
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.fftpack
+import Visualizer
 
 if __name__ == '__main__':
+    visualizer = Visualizer("QuestController_5946284.csv")
+    visualizer.visualize3D()
+    visualizer.visualizeHand(True)
+    plt.show()
 
-    # Ideeen om signaal beter te krijgen; moving average toepassen op beweging
-    # int algeneen ligt het probleem momenteel bij het positie signaal dat niet smooth is
 
-
-    o_db = pd.read_csv("QuestController_4215953.csv")
+    o_db = pd.read_csv("QuestController_5946284.csv")
 
     # Visualise movement in 3D
     x_axis_r = np.array(o_db.iloc[:,2])
@@ -33,7 +36,6 @@ if __name__ == '__main__':
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
-
 
     # Visualise speed & acceleration vector for right hand
     speed_vector = []

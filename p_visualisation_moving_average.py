@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
 
-    # Ideeen om signaal beter te krijgen; moving average toepassen op beweging
-    # int algeneen ligt het probleem momenteel bij het positie signaal dat niet smooth is
+    # TODO: figure out the right metrics
+    # TODO: apply Carlos data analysis
+    # TODO: create standing still signal
+    # TODO: create grabbing and moving signal
 
-
-    o_db = pd.read_csv("QuestController_4215953.csv")
+    o_db = pd.read_csv("QuestController_5946284.csv")
 
     # Visualise movement in 3D
     x_axis_r = np.array(o_db.iloc[:,2])
