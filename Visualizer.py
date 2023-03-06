@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.fftpack
 from scipy.interpolate import interp1d
+import smoothness
 
 class Visualizer():
     def __init__(self, fn):
@@ -116,6 +117,8 @@ class Visualizer():
         f = interp1d(timevector, speedvector)
         x_uniform = np.arange(int(timevector[0]), int(timevector[-1]), 12)
         ynew = f(x_uniform)
+        print("Sparc analysis: ")
+        print(smoothness.sparc(ynew, 12)[0])
 
         N = x_uniform.size
         yf = scipy.fftpack.fft(ynew)
