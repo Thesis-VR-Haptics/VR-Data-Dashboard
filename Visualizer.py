@@ -115,7 +115,7 @@ class Visualizer():
         # To use sample code, i need uniform samples.
         # I found that the amount of time between samples is on average 14.14ms, it ranges from 12 to 15 ms
         f = interp1d(timevector, speedvector)
-        x_uniform = np.arange(int(timevector[0]), int(timevector[-1]), 12)
+        x_uniform = np.arange(int(math.ceil(timevector[0])), int(timevector[-1]), 12)
         ynew = f(x_uniform)
         print("Sparc analysis: ")
         print(smoothness.sparc(ynew, 12)[0])
