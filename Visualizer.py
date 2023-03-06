@@ -85,6 +85,7 @@ class Visualizer():
         plt.xlabel("Time (ms)")
 
         self.time_vector = np.array(time*1000)
+        self.sv_unity = svUnity
 
     def applyMovingAvg(self, window = 3):
         self.x_axis_r = np.convolve(self.x_axis_r, np.ones(window),'valid')/window
@@ -117,13 +118,18 @@ class Visualizer():
         f = interp1d(timevector, speedvector)
         x_uniform = np.arange(int(math.ceil(timevector[0])), int(timevector[-1]), 12)
         ynew = f(x_uniform)
+        # Reason for the ms unit of the time signal is that otherwise i can't interpolate. This doesn't influence sparc.
         print("Sparc analysis: ")
         print(smoothness.sparc(ynew, 12)[0])
 
+        # Rescale time signal to seconds
+        x_uniform = [float(x) for x in x_uniform]
+        x_uniform = np.array(x_uniform)
+        x_uniform *= 0.001
+
         N = x_uniform.size
         yf = scipy.fftpack.fft(ynew)
-        xf = np.linspace(0.0, 1.0 / (2.0 * 12), N // 2)
+        xf = np.linspace(0.0, 1.0 / (2.0 * 0.012), N // 2)
         fig, ax = plt.subplots()
         ax.plot(xf, 2.0 / N * np.abs(yf[:N // 2]))
-        plt.show()
         
