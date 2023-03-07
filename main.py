@@ -1,6 +1,4 @@
 import pandas as pd
-#import plotpy.express as px
-#import plotpy.graph_objects as go
 import dash
 import plotly.graph_objs as go
 import dash_bootstrap_components as dbc
@@ -8,7 +6,9 @@ import numpy as np
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output, State
-import sys
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
+from Visualizer import Visualizer
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -23,7 +23,9 @@ if __name__ == '__main__':
                        value='All'), width = 4),
             dbc.Col(dcc.Dropdown(id="opt_dropdown",multi=False, style={'width': "100%"}), width = 3)
         ]),
-        dbc.Row(dcc.Graph(id="plot_id", figure={}))
+        dbc.Row([dcc.Tabs([
+            dcc.Tab(label='Exercise', children=[dcc.Graph(id="exercise_plot", style={'display': 'inline-block'}, figure={}),dcc.Graph(id="speed_plot", style={'display': 'inline-block'}, figure={})]),
+            dcc.Tab(label='Training', children=[dcc.Graph(id="training_plot", style={'display': 'inline-block'}, figure={})])])])
     ])
 
     def getRunIDs(username, controller):
@@ -40,12 +42,21 @@ if __name__ == '__main__':
             list.append(str)
         return list
 
-    def getFig():
-        o_db = pd.read_csv("oculus_data_csv.csv")
+    def get3DFig():
+        o_db = pd.read_csv("data\QuestController_notJittery.csv")
+        visualizer = Visualizer("data\QuestController_notJittery.csv")
+        visualizer.initializeVectors(True)
+        """
         x = o_db.iloc[:, 2]
         y = o_db.iloc[:, 3]
         z = o_db.iloc[:, 4]
-        t = o_db.iloc[:, 8]
+        t = o_db.iloc[:, 0]
+        """
+        x = visualizer.x_axis_r
+        y = visualizer.y_axis_r
+        z = visualizer.z_axis_r
+        t = visualizer.time
+
         trace = go.Scatter3d(
             x=x, y=y, z=z, mode='markers', marker=dict(
                 size=3,
@@ -57,15 +68,40 @@ if __name__ == '__main__':
         fig = go.Figure(data=[trace], layout=layout)
         return fig
 
-    @app.callback([Output('opt_dropdown','options'),Output(component_id='plot_id', component_property='figure')],
+    def getSpeedFig():
+        fig = make_subplots(
+            rows=3, cols=1,
+            shared_xaxes=True,
+            subplot_titles=('Position',  'Speed (m/s)', 'Acceleration (m/s^2)'))
+
+        visualizer = Visualizer("data\QuestController_notJittery.csv")
+        visualizer.initializeVectors(True)
+
+        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.x_axis_r, mode = 'markers', marker=dict(size=2)),
+                      row=1, col=1)
+        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.y_axis_r, mode = 'markers', marker=dict(size=2)),
+                      row=1, col=1)
+        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.z_axis_r, mode = 'markers', marker=dict(size=2)),
+                      row=1, col=1)
+
+        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.speed_vector, mode = 'markers', marker=dict(size=2)),
+                      row=2, col=1)
+        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.acceleration_vector, mode = 'markers',marker=dict(size=2)),
+                      row=3, col=1)
+
+        fig.update_layout(showlegend=False)
+        return fig
+
+    @app.callback([Output('opt_dropdown','options'),Output(component_id='exercise_plot', component_property='figure'),Output(component_id='speed_plot', component_property='figure')],
                   [Input('submit-button', 'n_clicks')],
                   [State('username', 'value'), State('controller', 'value')],
                   )
     def update_output(clicks, username_value, controller_value):
         opts = getRunIDs(username_value, controller_value)
         options = [{'label': opt, 'value': opt} for opt in opts]
-        fig = getFig()
+        fig3D = get3DFig()
+        figSpeed = getSpeedFig()
         if clicks is not None:
-            return options, fig
+            return options, fig3D, figSpeed
 
     app.run_server(debug=False)

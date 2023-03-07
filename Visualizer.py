@@ -31,61 +31,66 @@ class Visualizer():
         ax.set_ylabel('y')
         ax.set_zlabel('z')
 
-    def visualizeHand(self, righthand):
+    def initializeVectors(self, righthand):
         dist = 0
-        speed_vector = []
-        acceleration_vector = []
-        time = self.original_db.iloc[:, 0]/1000
-        if(righthand):
-            x_axis = self.x_axis_r
-            y_axis = self.y_axis_r
-            z_axis = self.z_axis_r
-            svUnity = np.array(self.original_db.iloc[:, 5])
+        self.speed_vector = []
+        self.acceleration_vector = []
+        time = self.original_db.iloc[:, 0] / 1000
+        if (righthand):
+            self.x_axis = self.x_axis_r
+            self.y_axis = self.y_axis_r
+            self.z_axis = self.z_axis_r
+            self.svUnity = np.array(self.original_db.iloc[:, 5])
         else:
-            x_axis = self.x_axis_l
-            y_axis = self.y_axis_l
-            z_axis = self.z_axis_l
-            svUnity = np.array(self.original_db.iloc[:, 10])
+            self.x_axis = self.x_axis_l
+            self.y_axis = self.y_axis_l
+            self.z_axis = self.z_axis_l
+            self.svUnity = np.array(self.original_db.iloc[:, 10])
 
         for i in range(len(self.original_db) - 1):
-            distance = math.sqrt((x_axis[i + 1] - x_axis[i]) ** 2 + (y_axis[i + 1] - y_axis[i]) ** 2 + (z_axis[i + 1] - z_axis[i]) ** 2)
+            distance = math.sqrt(
+                (self.x_axis[i + 1] - self.x_axis[i]) ** 2 + (self.y_axis[i + 1] - self.y_axis[i]) ** 2 + (
+                            self.z_axis[i + 1] - self.z_axis[i]) ** 2)
             dist += distance
-            speed =  distance/(time[i + 1] - time[i]) # Value in m/s
-            speed_vector.append(speed)
+            speed = distance / (time[i + 1] - time[i])  # Value in m/s
+            self.speed_vector.append(speed)
 
-        speed_vector = np.array(speed_vector)
-        speed_vector = np.append(speed_vector, 0)
+        self.speed_vector = np.array(self.speed_vector)
+        self.speed_vector = np.append(self.speed_vector, 0)
 
-        for i in range(len(speed_vector) - 1):
-            acceleration = (speed_vector[i + 1] - speed_vector[i]) / (time.iloc[i + 1] - time.iloc[i])
-            acceleration_vector.append(acceleration)
+        for i in range(len(self.speed_vector) - 1):
+            acceleration = (self.speed_vector[i + 1] - self.speed_vector[i]) / (time.iloc[i + 1] - time.iloc[i])
+            self.acceleration_vector.append(acceleration)
 
-        acceleration_vector = np.array(acceleration_vector)
-        acceleration_vector = np.append(acceleration_vector, 0)
+        self.acceleration_vector = np.array(self.acceleration_vector)
+        self.acceleration_vector = np.append(self.acceleration_vector, 0)
+        self.time = time
 
+    def visualizeHand(self, righthand):
+        self.initializeVectors(righthand)
+        time = self.time
         fig1 = plt.figure()
         ax1 = plt.subplot(3, 1, 1)
         plt.title("Speed and Acceleration for Right Hand")
-        plt.plot(time, x_axis)
-        plt.plot(time, y_axis)
-        plt.plot(time, z_axis)
+        plt.plot(time, self.x_axis)
+        plt.plot(time, self.y_axis)
+        plt.plot(time, self.z_axis)
         plt.ylabel("Displacement (?)")
-        self.speed_vector = speed_vector
 
         plt.subplot(3, 1, 2, sharex=ax1)
-        plt.plot(time, speed_vector, "o", markersize=3, color="green")
-        svUnity[svUnity == 0.0] = np.nan
+        plt.plot(time, self.speed_vector, "o", markersize=3, color="green")
+        self.svUnity[self.svUnity == 0.0] = np.nan
 
-        plt.plot(time, svUnity, "o", markersize=3, color="red")
+        plt.plot(time, self.svUnity, "o", markersize=3, color="red")
         plt.ylabel("Speed (m/s)")
 
         plt.subplot(3, 1, 3, sharex=ax1)
-        plt.plot(time, acceleration_vector, "o", markersize=1)
+        plt.plot(time, self.acceleration_vector, "o", markersize=1)
         plt.ylabel("Acceleration (?)")
         plt.xlabel("Time (ms)")
 
         self.time_vector = np.array(time*1000)
-        self.sv_unity = svUnity
+        self.sv_unity = self.svUnity
 
     def applyMovingAvg(self, window = 3):
         self.x_axis_r = np.convolve(self.x_axis_r, np.ones(window),'valid')/window
