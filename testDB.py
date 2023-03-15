@@ -1,10 +1,9 @@
-import pandas as pd
 import mysql.connector
 
 if __name__ == '__main__':
 
     mydb = mysql.connector.connect(
-        host="192.168.0.206",
+        host="192.168.0.125",
         user="haptics",
         password="haptics1",
         database="thesisdata"
@@ -12,7 +11,7 @@ if __name__ == '__main__':
 
     mycursor = mydb.cursor()
 
-    mycursor.execute("SELECT * FROM users")
+    mycursor.execute("SELECT * FROM oculuscontroller")
 
     myresult = mycursor.fetchall()
 

@@ -19,14 +19,22 @@ if __name__ == '__main__':
         dbc.Row([
             dbc.Col(dcc.Input(id='username', placeholder='Fill in username here', type='text'), width = 3),
             dbc.Col(html.Button(id='submit-button', type='submit', children='Submit'), width=2),
-            dbc.Col(dcc.RadioItems(id='controller', options=[' All ', ' Oculus Quest 2 Controllers ', ' Sense Glove ', ' Hi5 '],
+            dbc.Col(dcc.RadioItems(id='controller', options=[' All ', ' Oculus Quest 2 Controllers ', ' Sense Glove '],
                        value='All'), width = 4),
             dbc.Col(dcc.Dropdown(id="opt_dropdown",multi=False, style={'width': "100%"}), width = 3)
         ]),
         dbc.Row([dcc.Tabs([
             dcc.Tab(label='Exercise', children=[dcc.Graph(id="exercise_plot", style={'display': 'inline-block'}, figure={}),dcc.Graph(id="speed_plot", style={'display': 'inline-block'}, figure={})]),
-            dcc.Tab(label='Training', children=[dcc.Graph(id="training_plot", style={'display': 'inline-block'}, figure={})])])])
-    ])
+            dcc.Tab(label='Training', children=[dbc.Row([
+                dbc.Col(html.H3(children='''Exercise''')),dbc.Col(html.H3(children = "Average Smoothness")),dbc.Col(html.H3(children = "Time"))]),
+                dbc.Row([
+                dbc.Col(html.H5(children = "Apples")), dbc.Col(html.Div(id="appleAVG", children=5)), dbc.Col(html.Div(id="appleTIME", children=10))]),
+                dbc.Row([
+                    html.H5(children="Drawing")]),
+                dbc.Row([
+                    html.H5(children="Coffee")])
+            ]
+            )])])])
 
     def getRunIDs(username, controller):
         #TODO: run_db en user_db van de mysql server halen
@@ -44,7 +52,7 @@ if __name__ == '__main__':
 
     def get3DFig():
         o_db = pd.read_csv("data\QuestController_notJittery.csv")
-        visualizer = Visualizer("data\QuestController_notJittery.csv")
+        visualizer = Visualizer("data\QuestController_apples.csv")
         visualizer.initializeVectors(True)
         """
         x = o_db.iloc[:, 2]
@@ -74,7 +82,8 @@ if __name__ == '__main__':
             shared_xaxes=True,
             subplot_titles=('Position',  'Speed (m/s)', 'Acceleration (m/s^2)'))
 
-        visualizer = Visualizer("data\QuestController_notJittery.csv")
+        # TODO visualizer constructor maken die kan werken met info over user, run en controller
+        visualizer = Visualizer("data\QuestController_apples.csv")
         visualizer.initializeVectors(True)
 
         fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.x_axis_r, mode = 'markers', marker=dict(size=2)),

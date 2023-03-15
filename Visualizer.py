@@ -11,12 +11,12 @@ class Visualizer():
         self.filename = fn
         self.original_db = pd.read_csv(fn)
         self.x_axis_r = np.array(self.original_db.iloc[:, 2])
-        self.y_axis_r = np.array(self.original_db.iloc[:, 3])
-        self.z_axis_r = np.array(self.original_db.iloc[:, 4])
+        self.z_axis_r = np.array(self.original_db.iloc[:, 3])
+        self.y_axis_r = np.array(self.original_db.iloc[:, 4])
 
         self.x_axis_l = np.array(self.original_db.iloc[:, 7])
-        self.y_axis_l = np.array(self.original_db.iloc[:, 8])
-        self.z_axis_l = np.array(self.original_db.iloc[:, 9])
+        self.z_axis_l = np.array(self.original_db.iloc[:, 8])
+        self.y_axis_l = np.array(self.original_db.iloc[:, 9])
 
     def visualize3D(self):
         fig_r = plt.figure()
