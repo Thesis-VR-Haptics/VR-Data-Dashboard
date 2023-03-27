@@ -5,11 +5,42 @@ import matplotlib.pyplot as plt
 import scipy.fftpack
 from scipy.interpolate import interp1d
 import smoothness
+import mysql.connector
 
 class Visualizer():
-    def __init__(self, fn):
+    def __init__(self):
+        self.mydb = mysql.connector.connect(
+            host="192.168.0.125",
+            user="haptics",
+            password="haptics1",
+            database="thesisdata"
+        )
+
+        self.mycursor = self.mydb.cursor()
+        #TODO: bij deze functie rekening houden met parameters username en controller
+        #TODO: ipv csv lezen hier gebruiken maken van een connectie met de database
+
+    def setArrays(self, fn):
         self.filename = fn
         self.original_db = pd.read_csv(fn)
+        self.x_axis_r = np.array(self.original_db.iloc[:, 2])
+        self.z_axis_r = np.array(self.original_db.iloc[:, 3])
+        self.y_axis_r = np.array(self.original_db.iloc[:, 4])
+
+        self.x_axis_l = np.array(self.original_db.iloc[:, 7])
+        self.z_axis_l = np.array(self.original_db.iloc[:, 8])
+        self.y_axis_l = np.array(self.original_db.iloc[:, 9])
+
+    def getDataFromDB(self, runID = 28):
+        self.mycursor.execute("SELECT * FROM oculuscontroller WHERE runID = "+str(runID))
+        myresult = self.mycursor.fetchall()
+
+        rundata = pd.DataFrame(myresult)
+        rundata = rundata.iloc[:, 1:]
+        return rundata
+
+    def setArraysFromDB(self, db):
+        self.original_db = db
         self.x_axis_r = np.array(self.original_db.iloc[:, 2])
         self.z_axis_r = np.array(self.original_db.iloc[:, 3])
         self.y_axis_r = np.array(self.original_db.iloc[:, 4])
@@ -92,6 +123,39 @@ class Visualizer():
         self.time_vector = np.array(time*1000)
         self.sv_unity = self.svUnity
 
+    def getUserDB(self):
+        self.mycursor.execute("SELECT * FROM users")
+        myresult = self.mycursor.fetchall()
+
+        users = pd.DataFrame(myresult)
+        users = users.iloc[:, :]
+        return users
+
+    def getRunsDB(self):
+        self.mycursor.execute("SELECT * FROM rundata")
+        myresult = self.mycursor.fetchall()
+
+        rundata = pd.DataFrame(myresult)
+        rundata = rundata.iloc[:, :]
+        return rundata
+
+    def getRangesDB(self, runID):
+        self.mycursor.execute("SELECT * FROM rundata WHERE r_id = "+str(runID))
+        myresult = self.mycursor.fetchall()
+
+        rundata = pd.DataFrame(myresult)
+        lRl = rundata[4][0]
+        lRR = rundata[5][0]
+        lRF = rundata[6][0]
+        lRU = rundata[7][0]
+
+        rRl = rundata[8][0]
+        rRR = rundata[9][0]
+        rRF = rundata[10][0]
+        rRU = rundata[11][0]
+
+        return rRl, rRR,rRF,rRU
+
     def applyMovingAvg(self, window = 3):
         self.x_axis_r = np.convolve(self.x_axis_r, np.ones(window),'valid')/window
         for x in range(window-1):
@@ -117,6 +181,9 @@ class Visualizer():
         for x in range(window-1):
             self.z_axis_l = np.append(self.z_axis_l, 0)
 
+    def getValues(self):
+        return 0,0,0, 1,1,1
+
     def fft(self, timevector, speedvector):
         # To use sample code, i need uniform samples.
         # I found that the amount of time between samples is on average 14.14ms, it ranges from 12 to 15 ms
@@ -137,4 +204,48 @@ class Visualizer():
         xf = np.linspace(0.0, 1.0 / (2.0 * 0.012), N // 2)
         fig, ax = plt.subplots()
         ax.plot(xf, 2.0 / N * np.abs(yf[:N // 2]))
+
+    def calculateSmoothness(self):
+        self.initializeVectors(True)
+        time = self.time
+
+        self.svUnity[self.svUnity == 0.0] = np.nan
+        self.time_vector = np.array(time * 1000)
+        self.sv_unity = self.svUnity
+
+        f = interp1d(self.time_vector, self.speed_vector)
+        x_uniform = np.arange(int(math.ceil(self.time_vector[0])), int(self.time_vector[-1]), 12)
+        ynew = f(x_uniform)
+        # Reason for the ms unit of the time signal is that otherwise i can't interpolate. This doesn't influence sparc.
+        print("Sparc analysis: ")
+        sm = smoothness.sparc(ynew, 12)[0]
+        print(sm)
+        return sm
+
+    def sparcOnApples(self):
+        ol = self.original_db[(self.original_db[14] == 6) & (self.original_db[13] == 0)].reset_index(drop=True)
+        olVisualizer = Visualizer()
+        olVisualizer.setArraysFromDB(db = ol)
+        olsm = np.round(olVisualizer.calculateSmoothness(),3)
+        olavg = np.round(np.mean(olVisualizer.speed_vector),3)
+
+        il = self.original_db[(self.original_db[14] == 5) & (self.original_db[13] == 0)].reset_index(drop=True)
+        ilVisualizer = Visualizer()
+        ilVisualizer.setArraysFromDB(db=il)
+        ilsm = np.round(ilVisualizer.calculateSmoothness(),3)
+        ilavg = np.round(np.mean(ilVisualizer.speed_vector),3)
+
+        ori = self.original_db[(self.original_db[14] == 7) & (self.original_db[13] == 0)].reset_index(drop=True)
+        oriVisualizer = Visualizer()
+        oriVisualizer.setArraysFromDB(db=ori)
+        orism = np.round(oriVisualizer.calculateSmoothness(),3)
+        oriavg = np.round(np.mean(oriVisualizer.speed_vector),3)
+
+        ir = self.original_db[(self.original_db[14] == 8) & (self.original_db[13] == 0)].reset_index(drop=True)
+        irVisualizer = Visualizer()
+        irVisualizer.setArraysFromDB(db=ir)
+        irsm = np.round(irVisualizer.calculateSmoothness(),3)
+        iravg = np.round(np.mean(irVisualizer.speed_vector), 3)
+        return olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg
+
         

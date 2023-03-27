@@ -8,13 +8,15 @@ import smoothness
 from Visualizer import Visualizer
 
 if __name__ == '__main__':
-    visualizer = Visualizer("data\QuestController_notJittery.csv")
+    #visualizer = Visualizer("data\QuestController_notJittery.csv")
    # visualizer = Visualizer("data\QuestController_jittery.csv")
    # visualizer = Visualizer("data\QuestController_vJittery.csv")
-    #visualizer.applyMovingAvg()
+    visualizer = Visualizer()
+    visualizer.setArrays("data\QApplesFromDatabase")
     visualizer.visualize3D()
     visualizer.visualizeHand(True) #True als ge rechts wilt visualizeren
-    plt.show()
-    visualizer.fft(visualizer.time_vector,visualizer.speed_vector)
-    visualizer.fft(visualizer.time_vector, visualizer.sv_unity)
+    #plt.show()
+    #visualizer.fft(visualizer.time_vector,visualizer.speed_vector)
+    #visualizer.fft(visualizer.time_vector, visualizer.sv_unity)
+    visualizer.sparcOnApples()
     plt.show()

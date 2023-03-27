@@ -1,4 +1,7 @@
 import mysql.connector
+import pandas as pd
+
+from Visualizer import Visualizer
 
 if __name__ == '__main__':
 
@@ -11,9 +14,13 @@ if __name__ == '__main__':
 
     mycursor = mydb.cursor()
 
-    mycursor.execute("SELECT * FROM oculuscontroller")
+    mycursor.execute("SELECT * FROM users")
 
     myresult = mycursor.fetchall()
+    #for x in myresult:
+     #   print(x)
 
-    for x in myresult:
-        print(x)
+    vis = Visualizer()
+    vis.setArraysFromDB(vis.getDataFromDB(27))
+    vis.sparcOnApples()
+    print("test")
