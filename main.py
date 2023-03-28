@@ -158,13 +158,12 @@ if __name__ == '__main__':
             options = [{'label': opt, 'value': opt} for opt in opts]
             if runChosen[0] is not None:
                 visualizer.setArraysFromDB(visualizer.getDataFromDB(runChosen[0]))
+                #TODO: values van speed onder 0 eruit filteren
                 r1,r2,r3,r4 = visualizer.getRangesDB(runChosen[0])
             else:
                 visualizer.setArraysFromDB(visualizer.getDataFromDB(opts[0]))
                 r1,r2,r3,r4 = visualizer.getRangesDB(opts[0])
-           # visualizer.setArrays("data\QApplesFromDatabase")
             visualizer.initializeVectors(True)
-
 
             fig3D = get3DFig(visualizer)
             figSpeed = getSpeedFig(visualizer)
@@ -173,6 +172,6 @@ if __name__ == '__main__':
             smavg = np.round((olsm+ilsm+orism+irsm)/4,3)
             avgavg = np.round((olavg + ilavg + oriavg + iravg)/4,3)
             return options, fig3D, figSpeed, drawingavg, coffeavg, appleavg, drawingtime, appleTime, \
-                coffeetime, olsm, ilsm, orism, irsm, smavg, olavg, ilavg, oriavg, iravg, avgavg,f"Right {r1}",f"Left {r2}",f"Up {r3}",f"Forward {r4}"
+                coffeetime, olsm, ilsm, orism, irsm, smavg, olavg, ilavg, oriavg, iravg, avgavg,f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}"
 
     app.run_server(debug=False)

@@ -18,7 +18,6 @@ class Visualizer():
 
         self.mycursor = self.mydb.cursor()
         #TODO: bij deze functie rekening houden met parameters username en controller
-        #TODO: ipv csv lezen hier gebruiken maken van een connectie met de database
 
     def setArrays(self, fn):
         self.filename = fn
@@ -37,6 +36,7 @@ class Visualizer():
 
         rundata = pd.DataFrame(myresult)
         rundata = rundata.iloc[:, 1:]
+        rundata = rundata.sort_values(by=rundata.columns[0]).reset_index(drop=True)
         return rundata
 
     def setArraysFromDB(self, db):
