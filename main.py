@@ -12,6 +12,7 @@ from Visualizer import Visualizer
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+image_path =
 
 if __name__ == '__main__':
     app.layout = html.Div([
@@ -23,32 +24,79 @@ if __name__ == '__main__':
                        value='All'), width = 4),
             dbc.Col(dcc.Dropdown(id="opt_dropdown",multi=False, style={'width': "100%"}), width = 3)
         ]),
-        dbc.Row([dcc.Tabs([
-            dcc.Tab(label='Apples Exercise', children=[dcc.Graph(id="exercise_plot", style={'display': 'inline-block'}, figure={}),
-                                                dcc.Graph(id="speed_plot", style={'display': 'inline-block'}, figure={}),
-                                                dbc.Row([
-                dbc.Col(html.H3(children='')), dbc.Col(html.H3(children="1")),
-                dbc.Col(html.H3(children="2")), dbc.Col(html.H3(children="3")),dbc.Col(html.H3(children="4")),dbc.Col(html.H3(children="Average"))]),
-                                                dbc.Row([
-                dbc.Col(html.H5(children="Smoothness")), dbc.Col(html.Div(id="sm1", children="-1")),
-                dbc.Col(html.Div(id="sm2", children="-1")), dbc.Col(html.Div(id="sm3", children="-1")),dbc.Col(html.Div(id="sm4", children="-1")),dbc.Col(html.Div(id="smavg", children="-1"))]),
-                                                dbc.Row([
-                dbc.Col(html.H5(children="Average Speed")), dbc.Col(html.Div(id="avgs1", children="-1")),
-                dbc.Col(html.Div(id="avgs2", children="-1")), dbc.Col(html.Div(id="avgs3", children="-1")),dbc.Col(html.Div(id="avgs4", children="-1")),dbc.Col(html.Div(id="avgavg", children="-1"))]),
-                                                dbc.Row([
-                dbc.Col(html.H5(children="Range")), dbc.Col(html.Div(id="r1", children="-1")),
-                dbc.Col(html.Div(id="r2", children="-1")), dbc.Col(html.Div(id="r3", children="-1")),dbc.Col(html.Div(id="r4", children="-1"))])]),
+        dbc.Row(
+            [dcc.Tabs([
+                dcc.Tab(label='Kitchen Exercise', children=
+                    [dcc.Tabs([
+                        dcc.Tab(label='Level 3', children=[
+                            dcc.Graph(id="exercise_plot", style={'display': 'inline-block'}, figure={}),
+                            dcc.Graph(id="speed_plot", style={'display': 'inline-block'}, figure={}),
+                            dbc.Row([
+                                dbc.Col(html.H3(children='')), dbc.Col(html.H3(children="1")),
+                                dbc.Col(html.H3(children="2")), dbc.Col(html.H3(children="3")),
+                                dbc.Col(html.H3(children="4")),dbc.Col(html.H3(children="Average"))]),
+                            dbc.Row([
+                                dbc.Col(html.H5(children="Smoothness")), dbc.Col(html.Div(id="sm1", children="-1")),
+                                dbc.Col(html.Div(id="sm2", children="-1")), dbc.Col(html.Div(id="sm3", children="-1")),
+                                dbc.Col(html.Div(id="sm4", children="-1")),dbc.Col(html.Div(id="smavg", children="-1"))]),
+                            dbc.Row([
+                                dbc.Col(html.H5(children="Average Speed")), dbc.Col(html.Div(id="avgs1", children="-1")),
+                                dbc.Col(html.Div(id="avgs2", children="-1")), dbc.Col(html.Div(id="avgs3", children="-1")),
+                                dbc.Col(html.Div(id="avgs4", children="-1")),dbc.Col(html.Div(id="avgavg", children="-1"))]),
+                            dbc.Row([
+                                dbc.Col(html.H5(children="Range")), dbc.Col(html.Div(id="r1", children="-1")),
+                                dbc.Col(html.Div(id="r2", children="-1")), dbc.Col(html.Div(id="r3", children="-1")),dbc.Col(html.Div(id="r4", children="-1"))
+                            ])
+                        ]),
+                        dcc.Tab(label='Level 2', children=[
+                            dcc.Graph(id="exercise_plot_lvl2", style={'display': 'inline-block'}, figure={}),
+                            dcc.Graph(id="speed_plot_lvl2", style={'display': 'inline-block'}, figure={}),
+                            dbc.Row([
+                                dbc.Col(html.H3(children='')), dbc.Col(html.H3(children="1")),
+                                dbc.Col(html.H3(children="2")), dbc.Col(html.H3(children="Average"))]),
+                            dbc.Row([
+                                dbc.Col(html.H5(children="Smoothness")), dbc.Col(html.Div(id="sm1_lvl2", children="-1")),
+                                dbc.Col(html.Div(id="sm2_lvl2", children="-1")),
+                                dbc.Col(html.Div(id="smavg_lvl2", children="-1"))]),
+                            dbc.Row([
+                                dbc.Col(html.H5(children="Average Speed")),
+                                dbc.Col(html.Div(id="avgs1_lvl2", children="-1")),
+                                dbc.Col(html.Div(id="avgs2_lvl2", children="-1")),
+                                dbc.Col(html.Div(id="avgavg_lvl2", children="-1"))])
+                        ]),
+                        dcc.Tab(label='Level 1', children=[
+                            dcc.Graph(id="exercise_plot_lvl1", style={'display': 'inline-block'}, figure={}),
+                            dcc.Graph(id="speed_plot_lvl1", style={'display': 'inline-block'}, figure={}),
+                            dbc.Row([
+                                dbc.Col(html.H3(children='')), dbc.Col(html.H3(children="1")),
+                                dbc.Col(html.H3(children="2")), dbc.Col(html.H3(children="Average"))]),
+                            dbc.Row([
+                                dbc.Col(html.H5(children="Smoothness")),
+                                dbc.Col(html.Div(id="sm1_lvl1", children="-1")),
+                                dbc.Col(html.Div(id="sm2_lvl1", children="-1")),
+                                dbc.Col(html.Div(id="smavg_lvl1", children="-1"))]),
+                            dbc.Row([
+                                dbc.Col(html.H5(children="Average Speed")),
+                                dbc.Col(html.Div(id="avgs1_lvl1", children="-1")),
+                                dbc.Col(html.Div(id="avgs2_lvl1", children="-1")),
+                                dbc.Col(html.Div(id="avgavg_lvl1", children="-1"))])
+                        ])
+                    ])]),
 
-            dcc.Tab(label='Training', children=[dbc.Row([
-                dbc.Col(html.H3(children='''Exercise''')),dbc.Col(html.H3(children = "Average Smoothness")),dbc.Col(html.H3(children = "Time"))]),
-                dbc.Row([
-                dbc.Col(html.H5(children = "Apples")), dbc.Col(html.Div(id="appleAVG", children="-1")), dbc.Col(html.Div(id="appleTIME", children="-1"))]),
-                dbc.Row([
-                dbc.Col(html.H5(children="Drawing")), dbc.Col(html.Div(id="drawingAVG", children="-1")), dbc.Col(html.Div(id="drawingTIME", children="-1"))]),
-                dbc.Row([
-                dbc.Col(html.H5(children="Coffee")), dbc.Col(html.Div(id="coffeeAVG", children="-1")), dbc.Col(html.Div(id="coffeeTIME", children="-1"))])
-            ]
-            )])])])
+                dcc.Tab(label='Training', children=[
+                    dbc.Row([
+                        dbc.Col(html.H3(children='''Exercise''')),dbc.Col(html.H3(children = "Average Smoothness")),dbc.Col(html.H3(children = "Time"))]),
+                    dbc.Row([
+                        dbc.Col(html.H5(children = "Apples")),
+                        dbc.Col(html.Div(id="appleAVG", children="-1")),
+                        dbc.Col(html.Div(id="appleTIME", children="-1"))]),
+                    dbc.Row([
+                        dbc.Col(html.H5(children="Drawing")), dbc.Col(html.Div(id="drawingAVG", children="-1")), dbc.Col(html.Div(id="drawingTIME", children="-1"))]),
+                    dbc.Row([
+                        dbc.Col(html.H5(children="Coffee")), dbc.Col(html.Div(id="coffeeAVG", children="-1")), dbc.Col(html.Div(id="coffeeTIME", children="-1"))])
+                ])
+            ])]
+        )])
 
     def getRunIDs(visualizer, username):
         #TODO: run_db en user_db van de mysql server halen
@@ -67,12 +115,14 @@ if __name__ == '__main__':
             list.append(str)
         return list
 
-    def get3DFig(visualizer):
+    def get3DFig(visualizer, part):
+        x,y,z,t = visualizer.getAxesForPart(part)
+        """
         x = visualizer.x_axis_r
         y = visualizer.y_axis_r
         z = visualizer.z_axis_r
         t = visualizer.time
-
+        """
         trace = go.Scatter3d(
             x=x, y=y, z=z, mode='markers', marker=dict(
                 size=3,
@@ -80,44 +130,28 @@ if __name__ == '__main__':
                 colorscale='Viridis'
             )
         )
-        layout = go.Layout(title='3D movement')
+        layout = go.Layout()
         fig = go.Figure(data=[trace], layout=layout)
         return fig
 
-    def getSpeedFig(visualizer):
-        """
-        fig = make_subplots(
-            rows=3, cols=1,
-            shared_xaxes=True,
-            subplot_titles=('Position',  'Speed (m/s)', 'Acceleration (m/s^2)'))
+    def getSpeedFig(visualizer, part):
+        ol = visualizer.original_db[(visualizer.original_db[13] == part)].reset_index(drop=True)
+        olVisualizer = Visualizer()
+        olVisualizer.setArraysFromDB(db=ol)
+        olVisualizer.initializeVectors(True)
 
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.x_axis_r, mode = 'markers', marker=dict(size=2)),
-                      row=1, col=1)
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.y_axis_r, mode = 'markers', marker=dict(size=2)),
-                      row=1, col=1)
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.z_axis_r, mode = 'markers', marker=dict(size=2)),
-                      row=1, col=1)
-
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.speed_vector, mode = 'markers', marker=dict(size=2)),
-                      row=2, col=1)
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.acceleration_vector, mode = 'markers',marker=dict(size=2)),
-                      row=3, col=1)
-
-        fig.update_layout(showlegend=False)
-        """
         fig = make_subplots(
             rows=2, cols=1,
             shared_xaxes=True,
             subplot_titles=('Position', 'Speed (m/s)'))
 
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.x_axis_r, mode='markers', marker=dict(size=2)),
+        fig.add_trace(go.Scatter(x=olVisualizer.time, y=olVisualizer.x_axis_r, mode='markers', marker=dict(size=2)),
                       row=1, col=1)
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.y_axis_r, mode='markers', marker=dict(size=2)),
+        fig.add_trace(go.Scatter(x=olVisualizer.time, y=olVisualizer.y_axis_r, mode='markers', marker=dict(size=2)),
                       row=1, col=1)
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.z_axis_r, mode='markers', marker=dict(size=2)),
+        fig.add_trace(go.Scatter(x=olVisualizer.time, y=olVisualizer.z_axis_r, mode='markers', marker=dict(size=2)),
                       row=1, col=1)
-
-        fig.add_trace(go.Scatter(x=visualizer.time, y=visualizer.speed_vector, mode='markers', marker=dict(size=2)),
+        fig.add_trace(go.Scatter(x=olVisualizer.time, y=olVisualizer.speed_vector, mode='markers', marker=dict(size=2)),
                       row=2, col=1)
 
         fig.update_layout(showlegend=False)
@@ -146,7 +180,25 @@ if __name__ == '__main__':
                    Output(component_id='r1', component_property='children'),
                    Output(component_id='r2', component_property='children'),
                    Output(component_id='r3', component_property='children'),
-                   Output(component_id='r4', component_property='children')
+                   Output(component_id='r4', component_property='children'),
+
+                   Output(component_id='sm1_lvl2', component_property='children'),
+                   Output(component_id='sm2_lvl2', component_property='children'),
+                   Output(component_id='smavg_lvl2', component_property='children'),
+                   Output(component_id='avgs1_lvl2', component_property='children'),
+                   Output(component_id='avgs2_lvl2', component_property='children'),
+                   Output(component_id='avgavg_lvl2', component_property='children'),
+                   Output(component_id='exercise_plot_lvl2', component_property='figure'),
+                   Output(component_id='speed_plot_lvl2', component_property='figure'),
+
+                   Output(component_id='sm1_lvl1', component_property='children'),
+                   Output(component_id='sm2_lvl1', component_property='children'),
+                   Output(component_id='smavg_lvl1', component_property='children'),
+                   Output(component_id='avgs1_lvl1', component_property='children'),
+                   Output(component_id='avgs2_lvl1', component_property='children'),
+                   Output(component_id='avgavg_lvl1', component_property='children'),
+                   Output(component_id='exercise_plot_lvl1', component_property='figure'),
+                   Output(component_id='speed_plot_lvl1', component_property='figure')
                    ],
                   ([Input('submit-button', 'n_clicks')],[Input('opt_dropdown','value')]),
                   [State('username', 'value'), State('controller', 'value')],
@@ -165,13 +217,28 @@ if __name__ == '__main__':
                 r1,r2,r3,r4 = visualizer.getRangesDB(opts[0])
             visualizer.initializeVectors(True)
 
-            fig3D = get3DFig(visualizer)
-            figSpeed = getSpeedFig(visualizer)
+            fig3Dlvl3 = get3DFig(visualizer, 3)
+            fig3Dlvl2 = get3DFig(visualizer, 2)
+            fig3Dlvl1 = get3DFig(visualizer, 1)
+
+            figSpeedlvl3 = getSpeedFig(visualizer,3)
+            figSpeedlvl2 = getSpeedFig(visualizer,2)
+            figSpeedlvl1 = getSpeedFig(visualizer, 1)
+
             appleavg, coffeavg, drawingavg, appleTime, coffeetime, drawingtime = visualizer.getValues()
             olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg = visualizer.sparcOnApples()
+            crsm2, cravg2, mssm2, msavg2 = visualizer.sparcOnLvl2()
+            cksm1, ckavg1, cosm1, coavg1 = visualizer.sparcOnLvl1()
+            smavg2 = np.round((crsm2+mssm2)/2,3)
+            avgavg2 = np.round((cravg2 + msavg2)/2,3)
+            smavg1 = np.round((cosm1 + cksm1) / 2,3)
+            avgavg1 = np.round((coavg1 + ckavg1) / 2,3)
             smavg = np.round((olsm+ilsm+orism+irsm)/4,3)
             avgavg = np.round((olavg + ilavg + oriavg + iravg)/4,3)
-            return options, fig3D, figSpeed, drawingavg, coffeavg, appleavg, drawingtime, appleTime, \
-                coffeetime, olsm, ilsm, orism, irsm, smavg, olavg, ilavg, oriavg, iravg, avgavg,f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}"
+
+            return options, fig3Dlvl3, figSpeedlvl3, drawingavg, coffeavg, appleavg, drawingtime, appleTime, \
+                coffeetime, olsm, ilsm, orism, irsm, smavg, olavg, ilavg, oriavg, iravg, avgavg,f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}",\
+                crsm2, mssm2, smavg2, cravg2, msavg2, avgavg2, fig3Dlvl2, figSpeedlvl2,\
+                cosm1, cksm1, smavg1, coavg1, ckavg1, avgavg1, fig3Dlvl1, figSpeedlvl1
 
     app.run_server(debug=False)

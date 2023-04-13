@@ -10,7 +10,7 @@ import mysql.connector
 class Visualizer():
     def __init__(self):
         self.mydb = mysql.connector.connect(
-            host="192.168.0.125",
+            host="192.168.9.192",
             user="haptics",
             password="haptics1",
             database="thesisdata"
@@ -48,6 +48,7 @@ class Visualizer():
         self.x_axis_l = np.array(self.original_db.iloc[:, 7])
         self.z_axis_l = np.array(self.original_db.iloc[:, 8])
         self.y_axis_l = np.array(self.original_db.iloc[:, 9])
+        self.time = np.array(self.original_db.iloc[:, 0])
 
     def visualize3D(self):
         fig_r = plt.figure()
@@ -223,29 +224,73 @@ class Visualizer():
         return sm
 
     def sparcOnApples(self):
-        ol = self.original_db[(self.original_db[14] == 6) & (self.original_db[13] == 0)].reset_index(drop=True)
+        ol = self.original_db[(self.original_db[14] == 6) & (self.original_db[13] == 3)].reset_index(drop=True)
         olVisualizer = Visualizer()
         olVisualizer.setArraysFromDB(db = ol)
         olsm = np.round(olVisualizer.calculateSmoothness(),3)
         olavg = np.round(np.mean(olVisualizer.speed_vector),3)
 
-        il = self.original_db[(self.original_db[14] == 5) & (self.original_db[13] == 0)].reset_index(drop=True)
+        il = self.original_db[(self.original_db[14] == 5) & (self.original_db[13] == 3)].reset_index(drop=True)
         ilVisualizer = Visualizer()
         ilVisualizer.setArraysFromDB(db=il)
         ilsm = np.round(ilVisualizer.calculateSmoothness(),3)
         ilavg = np.round(np.mean(ilVisualizer.speed_vector),3)
 
-        ori = self.original_db[(self.original_db[14] == 7) & (self.original_db[13] == 0)].reset_index(drop=True)
+        ori = self.original_db[(self.original_db[14] == 7) & (self.original_db[13] == 3)].reset_index(drop=True)
         oriVisualizer = Visualizer()
         oriVisualizer.setArraysFromDB(db=ori)
         orism = np.round(oriVisualizer.calculateSmoothness(),3)
         oriavg = np.round(np.mean(oriVisualizer.speed_vector),3)
 
-        ir = self.original_db[(self.original_db[14] == 8) & (self.original_db[13] == 0)].reset_index(drop=True)
+        ir = self.original_db[(self.original_db[14] == 8) & (self.original_db[13] == 3)].reset_index(drop=True)
         irVisualizer = Visualizer()
         irVisualizer.setArraysFromDB(db=ir)
         irsm = np.round(irVisualizer.calculateSmoothness(),3)
         iravg = np.round(np.mean(irVisualizer.speed_vector), 3)
         return olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg
+
+    def sparcOnLvl2(self):
+        croissant = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 2)].reset_index(drop=True)
+        milkshake = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 2)].reset_index(drop=True)
+
+        crVisualizer = Visualizer()
+        crVisualizer.setArraysFromDB(db = croissant)
+        crsm = np.round(crVisualizer.calculateSmoothness(),3)
+        cravg = np.round(np.mean(crVisualizer.speed_vector),3)
+
+        msVisualizer = Visualizer()
+        msVisualizer.setArraysFromDB(db=milkshake)
+        mssm = np.round(msVisualizer.calculateSmoothness(), 3)
+        msavg = np.round(np.mean(msVisualizer.speed_vector), 3)
+
+        return crsm, cravg, mssm, msavg
+
+    def sparcOnLvl1(self):
+        coffee = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 1)].reset_index(drop=True)
+        cupcake = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 1)].reset_index(drop=True)
+
+        coVisualizer = Visualizer()
+        coVisualizer.setArraysFromDB(db = coffee)
+        cosm = np.round(coVisualizer.calculateSmoothness(),3)
+        coavg = np.round(np.mean(coVisualizer.speed_vector),3)
+
+        ckVisualizer = Visualizer()
+        ckVisualizer.setArraysFromDB(db=cupcake)
+        cksm = np.round(ckVisualizer.calculateSmoothness(), 3)
+        ckavg = np.round(np.mean(ckVisualizer.speed_vector), 3)
+
+        return cosm, coavg, cksm, ckavg
+
+    def getAxesForPart(self, part):
+        temp_db = self.original_db[self.original_db[13] == part].reset_index(drop=True)
+        x = np.array(temp_db.iloc[:,2])
+        z = np.array(temp_db.iloc[:, 3])
+        y = np.array(temp_db.iloc[:, 4])
+        t = temp_db.iloc[:, 0] / 1000
+        return x,y,z,t
+
+
+
+
 
         
