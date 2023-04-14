@@ -264,6 +264,59 @@ class Visualizer():
 
         return crsm, cravg, mssm, msavg
 
+    def sparcOnLvl4(self):
+        up = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 4)].reset_index(drop=True)
+        right = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 4)].reset_index(drop=True)
+        down = self.original_db[(self.original_db[14] == 2) & (self.original_db[13] == 4)].reset_index(drop=True)
+        left = self.original_db[(self.original_db[14] == 3) & (self.original_db[13] == 4)].reset_index(drop=True)
+
+        upVisualizer = Visualizer()
+        upVisualizer.setArraysFromDB(db = up)
+        upsm = np.round(upVisualizer.calculateSmoothness(),3)
+
+        rVisualizer = Visualizer()
+        rVisualizer.setArraysFromDB(db=right)
+        rsm = np.round(rVisualizer.calculateSmoothness(), 3)
+
+        downVisualizer = Visualizer()
+        downVisualizer.setArraysFromDB(db=down)
+        downsm = np.round(downVisualizer.calculateSmoothness(), 3)
+
+        lVisualizer = Visualizer()
+        lVisualizer.setArraysFromDB(db=left)
+        rsm = np.round(lVisualizer.calculateSmoothness(), 3)
+
+        up2 = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 5)].reset_index(drop=True)
+        right2 = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 5)].reset_index(drop=True)
+        down2 = self.original_db[(self.original_db[14] == 2) & (self.original_db[13] == 5)].reset_index(drop=True)
+        left2 = self.original_db[(self.original_db[14] == 3) & (self.original_db[13] == 5)].reset_index(drop=True)
+
+        up2Visualizer = Visualizer()
+        up2Visualizer.setArraysFromDB(db=up2)
+        up2sm = np.round(up2Visualizer.calculateSmoothness(), 3)
+
+        r2Visualizer = Visualizer()
+        r2Visualizer.setArraysFromDB(db=right2)
+        r2sm = np.round(r2Visualizer.calculateSmoothness(), 3)
+
+        down2Visualizer = Visualizer()
+        down2Visualizer.setArraysFromDB(db=down2)
+        down2sm = np.round(down2Visualizer.calculateSmoothness(), 3)
+
+        l2Visualizer = Visualizer()
+        l2Visualizer.setArraysFromDB(db=left2)
+        l2sm = np.round(l2Visualizer.calculateSmoothness(), 3)
+
+        smiley = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 6)].reset_index(drop=True)
+        smileyVisualizer = Visualizer()
+        smileyVisualizer.setArraysFromDB(db=smiley)
+        smileysm = np.round(smileyVisualizer.calculateSmoothness(), 3)
+        
+        lvl1sm = (upsm + rsm + downsm + rsm)/4
+        lvl2sm = (up2sm + r2sm + down2sm + r2sm)/4
+
+        return lvl1sm, lvl2sm, smileysm
+
     def sparcOnLvl1(self):
         coffee = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 1)].reset_index(drop=True)
         cupcake = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 1)].reset_index(drop=True)

@@ -13,7 +13,9 @@ from Visualizer import Visualizer
 
 external_stylesheets = [dbc.themes.LUX]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-image_path = "assets/DJI_0532.png"
+image_path_lvl1 = "assets/lvl1.png"
+image_path_lvl2 = "assets/lvl2.png"
+image_path_lvl3 = "assets/DJI_0532.png"
 
 if __name__ == '__main__':
     app.layout = html.Div([
@@ -33,7 +35,7 @@ if __name__ == '__main__':
                             dbc.Row([
                                 dbc.Col(dcc.Graph(id="exercise_plot", style={'margin-left':'7px', 'margin-top':'3px', 'template' : 'pulse'}, figure={})),
                                 dbc.Col(dcc.Graph(id="speed_plot", style={'margin-left':'7px', 'margin-top':'7px'}, figure={})),
-                                dbc.Col(html.Img(src = image_path, style={'margin-left':'7px', 'margin-top':'3px'}))
+                                dbc.Col(html.Img(src = image_path_lvl3, style={'margin-left':'7px', 'margin-top':'3px'}))
                             ]),
                             dbc.Row([
                                 dbc.Col(html.H3(children='',style={'margin-left':'7px', 'margin-top':'7px'})), dbc.Col(html.H3(children="1",style={'margin-left':'7px', 'margin-top':'7px'})),
@@ -53,8 +55,11 @@ if __name__ == '__main__':
                             ])
                         ]),
                         dcc.Tab(label='Level 2', children=[
-                            dcc.Graph(id="exercise_plot_lvl2", style={'display': 'inline-block'}, figure={}),
-                            dcc.Graph(id="speed_plot_lvl2", style={'display': 'inline-block'}, figure={}),
+                            dbc.Row([
+                                dbc.Col(dcc.Graph(id="exercise_plot_lvl2", style={'display': 'inline-block'}, figure={})),
+                                dbc.Col(dcc.Graph(id="speed_plot_lvl2", style={'display': 'inline-block'}, figure={})),
+                                dbc.Col(html.Img(src=image_path_lvl2, style={'margin-left': '7px', 'margin-top': '3px'}))
+                            ]),
                             dbc.Row([
                                 dbc.Col(html.H3(children='')), dbc.Col(html.H3(children="1")),
                                 dbc.Col(html.H3(children="2")), dbc.Col(html.H3(children="Average"))]),
@@ -69,8 +74,11 @@ if __name__ == '__main__':
                                 dbc.Col(html.Div(id="avgavg_lvl2", children="-1"))])
                         ]),
                         dcc.Tab(label='Level 1', children=[
-                            dcc.Graph(id="exercise_plot_lvl1", style={'display': 'inline-block'}, figure={}),
-                            dcc.Graph(id="speed_plot_lvl1", style={'display': 'inline-block'}, figure={}),
+                            dbc.Row([
+                                dbc.Col(dcc.Graph(id="exercise_plot_lvl1", style={'display': 'inline-block'}, figure={})),
+                                dbc.Col(dcc.Graph(id="speed_plot_lvl1", style={'display': 'inline-block'}, figure={})),
+                                dbc.Col(html.Img(src=image_path_lvl1, style={'margin-left': '7px', 'margin-top': '3px'}))
+                            ]),
                             dbc.Row([
                                 dbc.Col(html.H3(children='')), dbc.Col(html.H3(children="1")),
                                 dbc.Col(html.H3(children="2")), dbc.Col(html.H3(children="Average"))]),
@@ -131,10 +139,14 @@ if __name__ == '__main__':
         run_db = run_db[run_db[1]==user_id]
         run_db = run_db.iloc[::-1]
         list = []
+        times = []
         for i in range(len(run_db)):
             str=f'{run_db.iloc[i,0]}'
             list.append(str)
-        return list
+        for i in range(len(run_db)):
+            str=f'{run_db.iloc[i,3]}'
+            times.append(str)
+        return list, times
 
     def get3DFig(visualizer, part):
         x,y,z,t, color = visualizer.getAxesForPart(part)
@@ -162,7 +174,7 @@ if __name__ == '__main__':
         olVisualizer = Visualizer()
         olVisualizer.setArraysFromDB(db=ol)
         olVisualizer.initializeVectors(True)
-
+        color = olVisualizer.original_db.iloc[:, -1]
         fig = make_subplots(
             rows=2, cols=1,
             shared_xaxes=True,
@@ -174,7 +186,7 @@ if __name__ == '__main__':
                       row=1, col=1)
         fig.add_trace(go.Scatter(x=olVisualizer.time, y=olVisualizer.z_axis_r, mode='markers', marker=dict(size=2)),
                       row=1, col=1)
-        fig.add_trace(go.Scatter(x=olVisualizer.time, y=olVisualizer.speed_vector, mode='markers', marker=dict(size=2)),
+        fig.add_trace(go.Scatter(x=olVisualizer.time, y=olVisualizer.speed_vector, mode='markers', marker=dict(size=2, color = color, colorscale ="Viridis")),
                       row=2, col=1)
 
         fig.update_layout(showlegend=False)
@@ -233,7 +245,6 @@ if __name__ == '__main__':
                    Output(component_id='painting1', component_property='figure'),
                    Output(component_id='painting2', component_property='figure'),
                    Output(component_id='painting3', component_property='figure'),
-                   #TODO: ook id's van de andere componenten hierbij zetten
 
                    ],
                   ([Input('submit-button', 'n_clicks')],[Input('opt_dropdown','value')]),
@@ -242,8 +253,9 @@ if __name__ == '__main__':
     def update_output(clicks, runChosen, username_value, controller_value):
         if (clicks is not None and username_value is not None):
             visualizer = Visualizer()
-            opts = getRunIDs(visualizer, username_value)
-            options = [{'label': opt, 'value': opt} for opt in opts]
+            opts, times = getRunIDs(visualizer, username_value)
+
+            options = [{'label':times[i], 'value': opts[i]} for i in range(len(opts))]
             if runChosen[0] is not None:
                 visualizer.setArraysFromDB(visualizer.getDataFromDB(runChosen[0]))
                 r1,r2,r3,r4 = visualizer.getRangesDB(runChosen[0])
@@ -260,7 +272,6 @@ if __name__ == '__main__':
             figSpeedlvl2 = getSpeedFig(visualizer,2)
             figSpeedlvl1 = getSpeedFig(visualizer, 1)
 
-            #TODO: figuren maken, parameter gebruiken om juiste data te selecteren uit visualizer.original_db
             fig3Dlvl4 = get3DFig(visualizer,4)
             fig3Dlvl5 = get3DFig(visualizer,5)
             fig3Dlvl6 = get3DFig(visualizer,6)
@@ -271,7 +282,9 @@ if __name__ == '__main__':
             cksm1, ckavg1, cosm1, coavg1 = visualizer.sparcOnLvl1()
 
             #TODO: deze functie implementeren (baseer u op de bovenstaande)
-            #smsquare, smhouse, smsmiley = visualizer.sparcOnLvl4()
+            smsquare, smhouse, smsmiley = visualizer.sparcOnLvl4()
+
+            #TODO: een functie schrijven die de accuracy van uw tekeneing berekend
 
             smavg2 = np.round((crsm2+mssm2)/2,3)
             avgavg2 = np.round((cravg2 + msavg2)/2,3)
@@ -280,10 +293,9 @@ if __name__ == '__main__':
             smavg = np.round((olsm+ilsm+orism+irsm)/4,3)
             avgavg = np.round((olavg + ilavg + oriavg + iravg)/4,3)
 
-            #TODO: de juiste dingen ook hieraan toevoegen
             return options, fig3Dlvl3, figSpeedlvl3, drawingavg, coffeavg, appleavg, drawingtime, appleTime, \
                 coffeetime, olsm, ilsm, orism, irsm, smavg, olavg, ilavg, oriavg, iravg, avgavg,f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}",\
                 crsm2, mssm2, smavg2, cravg2, msavg2, avgavg2, fig3Dlvl2, figSpeedlvl2,\
-                cosm1, cksm1, smavg1, coavg1, ckavg1, avgavg1, fig3Dlvl1, figSpeedlvl1, -1,-1,-1,-1,-1,-1, fig3Dlvl4, fig3Dlvl5, fig3Dlvl6
+                cosm1, cksm1, smavg1, coavg1, ckavg1, avgavg1, fig3Dlvl1, figSpeedlvl1, -1,-1,-1,smsquare,smhouse,smsmiley, fig3Dlvl4, fig3Dlvl5, fig3Dlvl6
 
     app.run_server(debug=False)
