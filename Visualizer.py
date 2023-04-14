@@ -17,7 +17,6 @@ class Visualizer():
         )
 
         self.mycursor = self.mydb.cursor()
-        #TODO: bij deze functie rekening houden met parameters username en controller
 
     def setArrays(self, fn):
         self.filename = fn
@@ -36,7 +35,7 @@ class Visualizer():
 
         rundata = pd.DataFrame(myresult)
         rundata = rundata.iloc[:, 1:]
-        rundata = rundata.sort_values(by=rundata.columns[0]).reset_index(drop=True)
+        rundata = rundata.sort_values(by=[rundata.columns[0]]).reset_index(drop=True)
         return rundata
 
     def setArraysFromDB(self, db):
@@ -282,12 +281,14 @@ class Visualizer():
         return cosm, coavg, cksm, ckavg
 
     def getAxesForPart(self, part):
+        # TODO: ongeveer dezelfde maken hieronder
         temp_db = self.original_db[self.original_db[13] == part].reset_index(drop=True)
         x = np.array(temp_db.iloc[:,2])
         z = np.array(temp_db.iloc[:, 3])
         y = np.array(temp_db.iloc[:, 4])
         t = temp_db.iloc[:, 0] / 1000
-        return x,y,z,t
+        color = temp_db.iloc[:, -1]
+        return x,y,z,t,color
 
 
 
