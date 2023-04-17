@@ -15,7 +15,7 @@ external_stylesheets = [dbc.themes.LUX]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 image_path_lvl1 = "assets/lvl1.png"
 image_path_lvl2 = "assets/lvl2.png"
-image_path_lvl3 = "assets/DJI_0532.png"
+image_path_lvl3 = "assets/lvl3.png"
 
 if __name__ == '__main__':
     app.layout = html.Div([
@@ -52,6 +52,10 @@ if __name__ == '__main__':
                             dbc.Row([
                                 dbc.Col(html.H5(children="Range",style={'margin-left':'7px', 'margin-top':'7px'})), dbc.Col(html.Div(id="r1", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),
                                 dbc.Col(html.Div(id="r2", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})), dbc.Col(html.Div(id="r3", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),dbc.Col(html.Div(id="r4", children="-1",style={'margin-left':'7px', 'margin-top':'7px'}))
+                            ]),
+                            dbc.Row([
+                                dbc.Col(html.H2(children="Total Score", id = "totalScoreLvl3", style={'margin-left': '7px', 'margin-top': '7px'})),
+                                dbc.Col(html.H2(children="Objects Completed", id = "objslvl3", style={'margin-left': '7px', 'margin-top': '7px'})),
                             ])
                         ]),
                         dcc.Tab(label='Level 2', children=[
@@ -71,7 +75,11 @@ if __name__ == '__main__':
                                 dbc.Col(html.H5(children="Average Speed")),
                                 dbc.Col(html.Div(id="avgs1_lvl2", children="-1")),
                                 dbc.Col(html.Div(id="avgs2_lvl2", children="-1")),
-                                dbc.Col(html.Div(id="avgavg_lvl2", children="-1"))])
+                                dbc.Col(html.Div(id="avgavg_lvl2", children="-1"))]),
+                            dbc.Row([
+                                dbc.Col(html.H2(children="Total Score", id="totalScoreLvl2", style={'margin-left': '7px', 'margin-top': '7px'})),
+                                dbc.Col(html.H2(children="Objects Completed", id = "objslvl2", style={'margin-left': '7px', 'margin-top': '7px'})),
+                            ])
                         ]),
                         dcc.Tab(label='Level 1', children=[
                             dbc.Row([
@@ -91,7 +99,12 @@ if __name__ == '__main__':
                                 dbc.Col(html.H5(children="Average Speed")),
                                 dbc.Col(html.Div(id="avgs1_lvl1", children="-1")),
                                 dbc.Col(html.Div(id="avgs2_lvl1", children="-1")),
-                                dbc.Col(html.Div(id="avgavg_lvl1", children="-1"))])
+                                dbc.Col(html.Div(id="avgavg_lvl1", children="-1"))
+                            ]),
+                            dbc.Row([
+                                dbc.Col(html.H2(children="Total Score", id="totalScoreLvl1", style={'margin-left': '7px', 'margin-top': '7px'})),
+                                dbc.Col(html.H2(children="Objects Completed", id = "objslvl1", style={'margin-left': '7px', 'margin-top': '7px'}))
+                            ])
                         ])
                     ])
                     ]
@@ -194,6 +207,10 @@ if __name__ == '__main__':
 
         return fig
 
+    def emptyReturn():
+        return -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, \
+                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,-1,-1,-1
+
     @app.callback([Output('opt_dropdown','options'),
                    Output(component_id='exercise_plot', component_property='figure'),
                    Output(component_id='speed_plot', component_property='figure'),
@@ -213,6 +230,9 @@ if __name__ == '__main__':
                    Output(component_id='avgs3', component_property='children'),
                    Output(component_id='avgs4', component_property='children'),
                    Output(component_id='avgavg', component_property='children'),
+
+                   Output(component_id='totalScoreLvl3', component_property='children'),
+                   Output(component_id='objslvl3', component_property='children'),
                    Output(component_id='r1', component_property='children'),
                    Output(component_id='r2', component_property='children'),
                    Output(component_id='r3', component_property='children'),
@@ -226,6 +246,8 @@ if __name__ == '__main__':
                    Output(component_id='avgavg_lvl2', component_property='children'),
                    Output(component_id='exercise_plot_lvl2', component_property='figure'),
                    Output(component_id='speed_plot_lvl2', component_property='figure'),
+                   Output(component_id='totalScoreLvl2', component_property='children'),
+                   Output(component_id='objslvl2', component_property='children'),
 
                    Output(component_id='sm1_lvl1', component_property='children'),
                    Output(component_id='sm2_lvl1', component_property='children'),
@@ -235,6 +257,8 @@ if __name__ == '__main__':
                    Output(component_id='avgavg_lvl1', component_property='children'),
                    Output(component_id='exercise_plot_lvl1', component_property='figure'),
                    Output(component_id='speed_plot_lvl1', component_property='figure'),
+                   Output(component_id='totalScoreLvl1', component_property='children'),
+                   Output(component_id='objslvl1', component_property='children'),
 
                    Output(component_id='squareAcc', component_property='children'),
                    Output(component_id='houseAcc', component_property='children'),
@@ -252,50 +276,54 @@ if __name__ == '__main__':
                   )
     def update_output(clicks, runChosen, username_value, controller_value):
         if (clicks is not None and username_value is not None):
-            visualizer = Visualizer()
-            opts, times = getRunIDs(visualizer, username_value)
+            try:
+                visualizer = Visualizer()
+                opts, times = getRunIDs(visualizer, username_value)
 
-            options = [{'label':times[i], 'value': opts[i]} for i in range(len(opts))]
-            if runChosen[0] is not None:
-                visualizer.setArraysFromDB(visualizer.getDataFromDB(runChosen[0]))
-                r1,r2,r3,r4 = visualizer.getRangesDB(runChosen[0])
-            else:
-                visualizer.setArraysFromDB(visualizer.getDataFromDB(opts[0]))
-                r1,r2,r3,r4 = visualizer.getRangesDB(opts[0])
-            visualizer.initializeVectors(True)
+                options = [{'label':times[i], 'value': opts[i]} for i in range(len(opts))]
+                if runChosen[0] is not None:
+                    visualizer.setArraysFromDB(visualizer.getDataFromDB(runChosen[0]))
+                    r1,r2,r3,r4 = visualizer.getRangesDB(runChosen[0])
+                else:
+                    visualizer.setArraysFromDB(visualizer.getDataFromDB(opts[0]))
+                    r1,r2,r3,r4 = visualizer.getRangesDB(opts[0])
+                visualizer.initializeVectors(True)
 
-            fig3Dlvl3 = get3DFig(visualizer, 3)
-            fig3Dlvl2 = get3DFig(visualizer, 2)
-            fig3Dlvl1 = get3DFig(visualizer, 1)
+                # Kitchen Tab
+                olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothnessApples, avgSpeedApples, totalscoreApples = visualizer.sparcOnApples()
+                crsm2, cravg2, mssm2, msavg2, avgSmoothnessLVL2, avgSpeedLVL2, totalscoreLVL2 = visualizer.sparcOnLvl2()
+                cksm1, ckavg1, cosm1, coavg1, avgSmoothnessLVL1, avgSpeedLVL1, totalscoreLVL1 = visualizer.sparcOnLvl1()
 
-            figSpeedlvl3 = getSpeedFig(visualizer,3)
-            figSpeedlvl2 = getSpeedFig(visualizer,2)
-            figSpeedlvl1 = getSpeedFig(visualizer, 1)
+                fig3Dlvl3 = get3DFig(visualizer, 3)
+                fig3Dlvl2 = get3DFig(visualizer, 2)
+                fig3Dlvl1 = get3DFig(visualizer, 1)
+                figSpeedlvl3 = getSpeedFig(visualizer, 3)
+                figSpeedlvl2 = getSpeedFig(visualizer, 2)
+                figSpeedlvl1 = getSpeedFig(visualizer, 1)
 
-            fig3Dlvl4 = get3DFig(visualizer,4)
-            fig3Dlvl5 = get3DFig(visualizer,5)
-            fig3Dlvl6 = get3DFig(visualizer,6)
+                # Toolshed Tab
+                smsquare, smhouse, smsmiley = visualizer.sparcOnLvl4()
+                fig3Dlvl4 = get3DFig(visualizer, 4)
+                fig3Dlvl5 = get3DFig(visualizer, 5)
+                fig3Dlvl6 = get3DFig(visualizer, 6)
 
-            appleavg, coffeavg, drawingavg, appleTime, coffeetime, drawingtime = visualizer.getValues()
-            olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg = visualizer.sparcOnApples()
-            crsm2, cravg2, mssm2, msavg2 = visualizer.sparcOnLvl2()
-            cksm1, ckavg1, cosm1, coavg1 = visualizer.sparcOnLvl1()
+                # Training Tab
+                appleavg, coffeavg, drawingavg, appleTime, coffeetime, drawingtime = visualizer.getValues()
 
-            #TODO: deze functie implementeren (baseer u op de bovenstaande)
-            smsquare, smhouse, smsmiley = visualizer.sparcOnLvl4()
+                # Objects Completed
+                objslvl3 = f"Missions Completed = {4}/4"
+                objslvl2 = f"Missions Completed = {2}/2"
+                objslvl1 = f"Missions Completed = {2}/2"
 
-            #TODO: een functie schrijven die de accuracy van uw tekeneing berekend
-
-            smavg2 = np.round((crsm2+mssm2)/2,3)
-            avgavg2 = np.round((cravg2 + msavg2)/2,3)
-            smavg1 = np.round((cosm1 + cksm1) / 2,3)
-            avgavg1 = np.round((coavg1 + ckavg1) / 2,3)
-            smavg = np.round((olsm+ilsm+orism+irsm)/4,3)
-            avgavg = np.round((olavg + ilavg + oriavg + iravg)/4,3)
-
-            return options, fig3Dlvl3, figSpeedlvl3, drawingavg, coffeavg, appleavg, drawingtime, appleTime, \
-                coffeetime, olsm, ilsm, orism, irsm, smavg, olavg, ilavg, oriavg, iravg, avgavg,f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}",\
-                crsm2, mssm2, smavg2, cravg2, msavg2, avgavg2, fig3Dlvl2, figSpeedlvl2,\
-                cosm1, cksm1, smavg1, coavg1, ckavg1, avgavg1, fig3Dlvl1, figSpeedlvl1, -1,-1,-1,smsquare,smhouse,smsmiley, fig3Dlvl4, fig3Dlvl5, fig3Dlvl6
+                return options, fig3Dlvl3, figSpeedlvl3, drawingavg, coffeavg, appleavg, drawingtime, appleTime, \
+                    coffeetime, olsm, ilsm, orism, irsm, avgSmoothnessApples, olavg, ilavg, oriavg, iravg, avgSpeedApples,\
+                    f"Total Score = {totalscoreApples}",objslvl3, f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}",\
+                    crsm2, mssm2, avgSmoothnessLVL2, cravg2, msavg2, avgSpeedLVL2, fig3Dlvl2, figSpeedlvl2,f"Total Score = {totalscoreLVL2}",objslvl2, \
+                    cosm1, cksm1, avgSmoothnessLVL1, coavg1, ckavg1, avgSpeedLVL1, fig3Dlvl1, figSpeedlvl1, f"Total Score = {totalscoreLVL1}",objslvl1, \
+                    -1,-1,-1,smsquare,smhouse,smsmiley, fig3Dlvl4, fig3Dlvl5, fig3Dlvl6
+            except:
+                return emptyReturn()
+        else:
+            return emptyReturn()
 
     app.run_server(debug=False)

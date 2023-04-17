@@ -10,12 +10,12 @@ import mysql.connector
 class Visualizer():
     def __init__(self):
         self.mydb = mysql.connector.connect(
-            host="192.168.9.192",
+            host="192.168.0.125",
             user="haptics",
             password="haptics1",
             database="thesisdata"
         )
-
+        self.runID = None
         self.mycursor = self.mydb.cursor()
 
     def setArrays(self, fn):
@@ -142,7 +142,7 @@ class Visualizer():
     def getRangesDB(self, runID):
         self.mycursor.execute("SELECT * FROM rundata WHERE r_id = "+str(runID))
         myresult = self.mycursor.fetchall()
-
+        self.runID = runID
         rundata = pd.DataFrame(myresult)
         lRl = rundata[4][0]
         lRR = rundata[5][0]
@@ -153,6 +153,11 @@ class Visualizer():
         rRR = rundata[9][0]
         rRF = rundata[10][0]
         rRU = rundata[11][0]
+
+        self.range_right = rRR
+        self.range_left = rRl
+        self.range_front = rRF
+        self.range_up = rRU
 
         return rRl, rRR,rRF,rRU
 
@@ -182,6 +187,7 @@ class Visualizer():
             self.z_axis_l = np.append(self.z_axis_l, 0)
 
     def getValues(self):
+
         return 0,0,0, 1,1,1
 
     def fft(self, timevector, speedvector):
@@ -246,7 +252,34 @@ class Visualizer():
         irVisualizer.setArraysFromDB(db=ir)
         irsm = np.round(irVisualizer.calculateSmoothness(),3)
         iravg = np.round(np.mean(irVisualizer.speed_vector), 3)
-        return olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg
+
+        avgSmoothness = np.round((olsm+ilsm+orism+irsm)/4,3)
+        avgSpeed = np.round((olavg + ilavg + oriavg + iravg) / 4, 3)
+
+        minbound = 0
+        maxbound = 1
+
+        rRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_right)
+        lRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_left)
+        fRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_front)
+
+        smoothnessScore = self.calculateSmoothnessScore(-1.4, -4, avgSmoothness)
+
+        totalscore = 0.7*smoothnessScore + 0.3*(rRangeScore+lRangeScore+fRangeScore)/3
+
+        return olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothness, avgSpeed, totalscore
+
+    def calculateRangeScore(self, minbound, maxbound, value):
+        if (value > maxbound):
+            return 100
+        elif (value < minbound):
+            return 0
+        else:
+            return (value-minbound) / (maxbound-minbound) * 100
+
+    def calculateSmoothnessScore(self, maxbound, minbound, value):
+        return 100 - self.calculateRangeScore(-1*maxbound, -1*minbound, value*-1)
+
 
     def sparcOnLvl2(self):
         croissant = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 2)].reset_index(drop=True)
@@ -262,7 +295,20 @@ class Visualizer():
         mssm = np.round(msVisualizer.calculateSmoothness(), 3)
         msavg = np.round(np.mean(msVisualizer.speed_vector), 3)
 
-        return crsm, cravg, mssm, msavg
+        smavg2 = np.round((crsm + mssm) / 2, 3)
+        avgavg2 = np.round((cravg + msavg) / 2, 3)
+
+        minbound = 0
+        maxbound = 1
+
+        rRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_right)
+        fRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_front)
+
+        smoothnessScore = self.calculateSmoothnessScore(-1.4, -4, smavg2)
+
+        totalscore = 0.7 * smoothnessScore + 0.3 * (rRangeScore + fRangeScore) / 2
+
+        return crsm, cravg, mssm, msavg, smavg2, avgavg2, totalscore
 
     def sparcOnLvl4(self):
         up = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 4)].reset_index(drop=True)
@@ -331,7 +377,21 @@ class Visualizer():
         cksm = np.round(ckVisualizer.calculateSmoothness(), 3)
         ckavg = np.round(np.mean(ckVisualizer.speed_vector), 3)
 
-        return cosm, coavg, cksm, ckavg
+        smavg1 = np.round((cosm + cksm) / 2, 3)
+        avgavg1 = np.round((coavg + ckavg) / 2, 3)
+
+        minbound = 0
+        maxbound = 1
+        rRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_right)
+        lRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_left)
+        fRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_front)
+        uRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_up)
+
+        smoothnessScore = self.calculateSmoothnessScore(-1.4, -4, smavg1)
+
+        totalscore = 0.6 * smoothnessScore + 0.4 * (rRangeScore + lRangeScore + fRangeScore + uRangeScore) / 4
+
+        return cosm, coavg, cksm, ckavg, smavg1, avgavg1, totalscore
 
     def getAxesForPart(self, part):
         # TODO: ongeveer dezelfde maken hieronder
