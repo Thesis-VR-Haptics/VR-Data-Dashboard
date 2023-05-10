@@ -5,12 +5,15 @@ import matplotlib.pyplot as plt
 import scipy.fftpack
 from scipy.interpolate import interp1d
 import smoothness
+import mysql
 import mysql.connector
+
 
 class Visualizer():
     def __init__(self):
         self.mydb = mysql.connector.connect(
             host="192.168.0.125",
+            # host="localhost",
             user="haptics",
             password="haptics1",
             database="thesisdata"
@@ -29,8 +32,8 @@ class Visualizer():
         self.z_axis_l = np.array(self.original_db.iloc[:, 8])
         self.y_axis_l = np.array(self.original_db.iloc[:, 9])
 
-    def getDataFromDB(self, runID = 28):
-        self.mycursor.execute("SELECT * FROM oculuscontroller WHERE runID = "+str(runID))
+    def getDataFromDB(self, runID=28):
+        self.mycursor.execute("SELECT * FROM oculuscontroller WHERE runID = " + str(runID))
         myresult = self.mycursor.fetchall()
 
         rundata = pd.DataFrame(myresult)
@@ -81,7 +84,7 @@ class Visualizer():
         for i in range(len(self.original_db) - 1):
             distance = math.sqrt(
                 (self.x_axis[i + 1] - self.x_axis[i]) ** 2 + (self.y_axis[i + 1] - self.y_axis[i]) ** 2 + (
-                            self.z_axis[i + 1] - self.z_axis[i]) ** 2)
+                        self.z_axis[i + 1] - self.z_axis[i]) ** 2)
             dist += distance
             speed = distance / (time[i + 1] - time[i])  # Value in m/s
             self.speed_vector.append(speed)
@@ -120,7 +123,7 @@ class Visualizer():
         plt.ylabel("Acceleration (?)")
         plt.xlabel("Time (ms)")
 
-        self.time_vector = np.array(time*1000)
+        self.time_vector = np.array(time * 1000)
         self.sv_unity = self.svUnity
 
     def getUserDB(self):
@@ -140,7 +143,7 @@ class Visualizer():
         return rundata
 
     def getRangesDB(self, runID):
-        self.mycursor.execute("SELECT * FROM rundata WHERE r_id = "+str(runID))
+        self.mycursor.execute("SELECT * FROM rundata WHERE r_id = " + str(runID))
         myresult = self.mycursor.fetchall()
         self.runID = runID
         rundata = pd.DataFrame(myresult)
@@ -159,36 +162,56 @@ class Visualizer():
         self.range_front = rRF
         self.range_up = rRU
 
-        return rRl, rRR,rRF,rRU
+        return rRl, rRR, rRF, rRU
 
-    def applyMovingAvg(self, window = 3):
-        self.x_axis_r = np.convolve(self.x_axis_r, np.ones(window),'valid')/window
-        for x in range(window-1):
+    def getObjectives(self):
+        self.mycursor.execute("SELECT * FROM rundata WHERE r_id = " + str(self.runID))
+        myresult = self.mycursor.fetchall()
+
+        rundata = pd.DataFrame(myresult)
+        objlvl1 = rundata[12][0]
+        objlvl2 = rundata[13][0]
+        objlvl3 = rundata[14][0]
+        return objlvl1, objlvl2, objlvl3
+
+    def getAccDB(self):
+        self.mycursor.execute("SELECT * FROM rundata WHERE r_id = " + str(self.runID))
+        myresult = self.mycursor.fetchall()
+
+        rundata = pd.DataFrame(myresult)
+        acc1 = rundata[15][0]
+        acc2 = rundata[16][0]
+        acc3 = rundata[17][0]
+        return acc1, acc2, acc3
+
+    def applyMovingAvg(self, window=3):
+        self.x_axis_r = np.convolve(self.x_axis_r, np.ones(window), 'valid') / window
+        for x in range(window - 1):
             self.x_axis_r = np.append(self.x_axis_r, 0)
 
         self.y_axis_r = np.convolve(self.y_axis_r, np.ones(window), 'valid') / window
-        for x in range(window-1):
+        for x in range(window - 1):
             self.y_axis_r = np.append(self.y_axis_r, 0)
 
         self.z_axis_r = np.convolve(self.z_axis_r, np.ones(window), 'valid') / window
-        for x in range(window-1):
+        for x in range(window - 1):
             self.z_axis_r = np.append(self.z_axis_r, 0)
 
         self.x_axis_l = np.convolve(self.x_axis_l, np.ones(window), 'valid') / window
-        for x in range(window-1):
+        for x in range(window - 1):
             self.x_axis_l = np.append(self.x_axis_l, 0)
 
         self.y_axis_l = np.convolve(self.y_axis_l, np.ones(window), 'valid') / window
-        for x in range(window-1):
+        for x in range(window - 1):
             self.y_axis_l = np.append(self.y_axis_l, 0)
 
         self.z_axis_l = np.convolve(self.z_axis_l, np.ones(window), 'valid') / window
-        for x in range(window-1):
+        for x in range(window - 1):
             self.z_axis_l = np.append(self.z_axis_l, 0)
 
     def getValues(self):
 
-        return 0,0,0, 1,1,1
+        return 0, 0, 0, 1, 1, 1
 
     def fft(self, timevector, speedvector):
         # To use sample code, i need uniform samples.
@@ -231,43 +254,34 @@ class Visualizer():
     def sparcOnApples(self):
         ol = self.original_db[(self.original_db[14] == 6) & (self.original_db[13] == 3)].reset_index(drop=True)
         olVisualizer = Visualizer()
-        olVisualizer.setArraysFromDB(db = ol)
-        olsm = np.round(olVisualizer.calculateSmoothness(),3)
-        olavg = np.round(np.mean(olVisualizer.speed_vector),3)
+        olVisualizer.setArraysFromDB(db=ol)
+        olsm = np.round(olVisualizer.calculateSmoothness(), 3)
+        olavg = np.round(np.mean(olVisualizer.speed_vector), 3)
 
         il = self.original_db[(self.original_db[14] == 5) & (self.original_db[13] == 3)].reset_index(drop=True)
         ilVisualizer = Visualizer()
         ilVisualizer.setArraysFromDB(db=il)
-        ilsm = np.round(ilVisualizer.calculateSmoothness(),3)
-        ilavg = np.round(np.mean(ilVisualizer.speed_vector),3)
+        ilsm = np.round(ilVisualizer.calculateSmoothness(), 3)
+        ilavg = np.round(np.mean(ilVisualizer.speed_vector), 3)
 
         ori = self.original_db[(self.original_db[14] == 7) & (self.original_db[13] == 3)].reset_index(drop=True)
         oriVisualizer = Visualizer()
         oriVisualizer.setArraysFromDB(db=ori)
-        orism = np.round(oriVisualizer.calculateSmoothness(),3)
-        oriavg = np.round(np.mean(oriVisualizer.speed_vector),3)
+        orism = np.round(oriVisualizer.calculateSmoothness(), 3)
+        oriavg = np.round(np.mean(oriVisualizer.speed_vector), 3)
 
         ir = self.original_db[(self.original_db[14] == 8) & (self.original_db[13] == 3)].reset_index(drop=True)
         irVisualizer = Visualizer()
         irVisualizer.setArraysFromDB(db=ir)
-        irsm = np.round(irVisualizer.calculateSmoothness(),3)
+        irsm = np.round(irVisualizer.calculateSmoothness(), 3)
         iravg = np.round(np.mean(irVisualizer.speed_vector), 3)
 
-        avgSmoothness = np.round((olsm+ilsm+orism+irsm)/4,3)
+        avgSmoothness = np.round((olsm + ilsm + orism + irsm) / 4, 3)
         avgSpeed = np.round((olavg + ilavg + oriavg + iravg) / 4, 3)
 
-        minbound = 0
-        maxbound = 1
+        smoothnessScore = np.round(self.calculateSmoothnessScore(-1.56, -4, avgSmoothness), 3)
 
-        rRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_right)
-        lRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_left)
-        fRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_front)
-
-        smoothnessScore = self.calculateSmoothnessScore(-1.4, -4, avgSmoothness)
-
-        totalscore = 0.7*smoothnessScore + 0.3*(rRangeScore+lRangeScore+fRangeScore)/3
-
-        return olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothness, avgSpeed, totalscore
+        return olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothness, avgSpeed, smoothnessScore
 
     def calculateRangeScore(self, minbound, maxbound, value):
         if (value > maxbound):
@@ -275,20 +289,19 @@ class Visualizer():
         elif (value < minbound):
             return 0
         else:
-            return (value-minbound) / (maxbound-minbound) * 100
+            return (value - minbound) / (maxbound - minbound) * 100
 
-    def calculateSmoothnessScore(self, maxbound, minbound, value):
-        return 100 - self.calculateRangeScore(-1*maxbound, -1*minbound, value*-1)
-
+    def calculateSmoothnessScore(self, maxbound=-1.56, minbound=-4, value=-5):
+        return np.round(100 - self.calculateRangeScore(-1 * maxbound, -1 * minbound, value * -1), 3)
 
     def sparcOnLvl2(self):
         croissant = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 2)].reset_index(drop=True)
         milkshake = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 2)].reset_index(drop=True)
 
         crVisualizer = Visualizer()
-        crVisualizer.setArraysFromDB(db = croissant)
-        crsm = np.round(crVisualizer.calculateSmoothness(),3)
-        cravg = np.round(np.mean(crVisualizer.speed_vector),3)
+        crVisualizer.setArraysFromDB(db=croissant)
+        crsm = np.round(crVisualizer.calculateSmoothness(), 3)
+        cravg = np.round(np.mean(crVisualizer.speed_vector), 3)
 
         msVisualizer = Visualizer()
         msVisualizer.setArraysFromDB(db=milkshake)
@@ -298,17 +311,9 @@ class Visualizer():
         smavg2 = np.round((crsm + mssm) / 2, 3)
         avgavg2 = np.round((cravg + msavg) / 2, 3)
 
-        minbound = 0
-        maxbound = 1
+        smoothnessScore = self.calculateSmoothnessScore(-1.56, -4, smavg2)
 
-        rRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_right)
-        fRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_front)
-
-        smoothnessScore = self.calculateSmoothnessScore(-1.4, -4, smavg2)
-
-        totalscore = 0.7 * smoothnessScore + 0.3 * (rRangeScore + fRangeScore) / 2
-
-        return crsm, cravg, mssm, msavg, smavg2, avgavg2, totalscore
+        return crsm, cravg, mssm, msavg, smavg2, avgavg2, smoothnessScore
 
     def sparcOnLvl4(self):
         up = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 4)].reset_index(drop=True)
@@ -317,8 +322,8 @@ class Visualizer():
         left = self.original_db[(self.original_db[14] == 3) & (self.original_db[13] == 4)].reset_index(drop=True)
 
         upVisualizer = Visualizer()
-        upVisualizer.setArraysFromDB(db = up)
-        upsm = np.round(upVisualizer.calculateSmoothness(),3)
+        upVisualizer.setArraysFromDB(db=up)
+        upsm = np.round(upVisualizer.calculateSmoothness(), 3)
 
         rVisualizer = Visualizer()
         rVisualizer.setArraysFromDB(db=right)
@@ -357,20 +362,23 @@ class Visualizer():
         smileyVisualizer = Visualizer()
         smileyVisualizer.setArraysFromDB(db=smiley)
         smileysm = np.round(smileyVisualizer.calculateSmoothness(), 3)
-        
-        lvl1sm = (upsm + rsm + downsm + rsm)/4
-        lvl2sm = (up2sm + r2sm + down2sm + r2sm)/4
 
-        return lvl1sm, lvl2sm, smileysm
+        lvl1sm = (upsm + rsm + downsm + rsm) / 4
+        lvl2sm = (up2sm + r2sm + down2sm + r2sm) / 4
+
+        avgsm = (lvl1sm + lvl2sm + smileysm) / 3
+        smoothnessScore = self.calculateSmoothnessScore(-1.56, -4, avgsm)
+
+        return np.round(lvl1sm, 3), np.round(lvl2sm, 3), np.round(smileysm, 3), smoothnessScore
 
     def sparcOnLvl1(self):
         coffee = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 1)].reset_index(drop=True)
         cupcake = self.original_db[(self.original_db[14] == 0) & (self.original_db[13] == 1)].reset_index(drop=True)
 
         coVisualizer = Visualizer()
-        coVisualizer.setArraysFromDB(db = coffee)
-        cosm = np.round(coVisualizer.calculateSmoothness(),3)
-        coavg = np.round(np.mean(coVisualizer.speed_vector),3)
+        coVisualizer.setArraysFromDB(db=coffee)
+        cosm = np.round(coVisualizer.calculateSmoothness(), 3)
+        coavg = np.round(np.mean(coVisualizer.speed_vector), 3)
 
         ckVisualizer = Visualizer()
         ckVisualizer.setArraysFromDB(db=cupcake)
@@ -380,31 +388,81 @@ class Visualizer():
         smavg1 = np.round((cosm + cksm) / 2, 3)
         avgavg1 = np.round((coavg + ckavg) / 2, 3)
 
-        minbound = 0
-        maxbound = 1
-        rRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_right)
-        lRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_left)
-        fRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_front)
-        uRangeScore = self.calculateRangeScore(minbound, maxbound, self.range_up)
+        smoothnessScore = self.calculateSmoothnessScore(-1.56, -4, smavg1)
 
-        smoothnessScore = self.calculateSmoothnessScore(-1.4, -4, smavg1)
+        return cosm, coavg, cksm, ckavg, smavg1, avgavg1, smoothnessScore
 
-        totalscore = 0.6 * smoothnessScore + 0.4 * (rRangeScore + lRangeScore + fRangeScore + uRangeScore) / 4
+    def sparcOnRainbow(self):
+        t1 = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 7)].reset_index(drop=True)
+        t2 = self.original_db[(self.original_db[14] == 2) & (self.original_db[13] == 7)].reset_index(drop=True)
+        t3 = self.original_db[(self.original_db[14] == 3) & (self.original_db[13] == 7)].reset_index(drop=True)
+        t4 = self.original_db[(self.original_db[14] == 4) & (self.original_db[13] == 7)].reset_index(drop=True)
+        t5 = self.original_db[(self.original_db[14] == 5) & (self.original_db[13] == 7)].reset_index(drop=True)
 
-        return cosm, coavg, cksm, ckavg, smavg1, avgavg1, totalscore
+        t1Visualizer = Visualizer()
+        t1Visualizer.setArraysFromDB(db=t1)
+        t1sm = np.round(t1Visualizer.calculateSmoothness(), 3)
+
+        t2Visualizer = Visualizer()
+        t2Visualizer.setArraysFromDB(db=t2)
+        t2sm = np.round(t2Visualizer.calculateSmoothness(), 3)
+
+        t3Visualizer = Visualizer()
+        t3Visualizer.setArraysFromDB(db=t3)
+        t3sm = np.round(t3Visualizer.calculateSmoothness(), 3)
+
+        t4Visualizer = Visualizer()
+        t4Visualizer.setArraysFromDB(db=t4)
+        t4sm = np.round(t4Visualizer.calculateSmoothness(), 3)
+
+        t5Visualizer = Visualizer()
+        t5Visualizer.setArraysFromDB(db=t5)
+        t5sm = np.round(t5Visualizer.calculateSmoothness(), 3)
+        print(f"Rainbow smoothnesses = {t1sm},{t2sm},{t3sm},{t4sm},{t5sm}")
+
+        return self.calculateSmoothnessScore(value=t1sm), self.calculateSmoothnessScore(
+            value=t2sm), self.calculateSmoothnessScore(value=t3sm), self.calculateSmoothnessScore(
+            value=t4sm), self.calculateSmoothnessScore(value=t5sm)
 
     def getAxesForPart(self, part):
-        # TODO: ongeveer dezelfde maken hieronder
         temp_db = self.original_db[self.original_db[13] == part].reset_index(drop=True)
-        x = np.array(temp_db.iloc[:,2])
+        x = np.array(temp_db.iloc[:, 2])
         z = np.array(temp_db.iloc[:, 3])
         y = np.array(temp_db.iloc[:, 4])
         t = temp_db.iloc[:, 0] / 1000
         color = temp_db.iloc[:, -1]
-        return x,y,z,t,color
+        return x, y, z, t, color
 
+    def getAxesForRainbow(self):
+        t1 = self.original_db[(self.original_db[14] == 1) & (self.original_db[13] == 7)].reset_index(drop=True)
+        t2 = self.original_db[(self.original_db[14] == 2) & (self.original_db[13] == 7)].reset_index(drop=True)
+        t3 = self.original_db[(self.original_db[14] == 3) & (self.original_db[13] == 7)].reset_index(drop=True)
+        t4 = self.original_db[(self.original_db[14] == 4) & (self.original_db[13] == 7)].reset_index(drop=True)
+        t5 = self.original_db[(self.original_db[14] == 5) & (self.original_db[13] == 7)].reset_index(drop=True)
 
+        temp_db = pd.concat([t1, t2, t3, t4, t5], axis=0)
 
+        x = np.array(temp_db.iloc[:, 2])
+        z = np.array(temp_db.iloc[:, 3])
+        y = np.array(temp_db.iloc[:, 4])
+        t = temp_db.iloc[:, 0] / 1000
+        color = temp_db.iloc[:, -1]
+        return x, y, z, t, color
 
+    def getAverageSmoothness(self):
+        combos = [[1, 0], [1, 1], [2, 0], [2, 1], [3, 5], [3, 6], [3, 7], [3, 8], [7, 1], [7, 2], [7, 3], [7, 4],
+                  [7, 5], [4, 0], [4, 1], [4, 2], [4, 3], [5, 0], [5, 1], [5, 2], [5, 3], [6, 0]]
+        values = []
+        for i in combos:
+            exercise = i[0]
+            tryid = i[1]
+            t = self.original_db[(self.original_db[14] == tryid) & (self.original_db[13] == exercise)].reset_index(
+                drop=True)
+            tVisualizer = Visualizer()
+            tVisualizer.setArraysFromDB(db=t)
+            tsm = np.round(tVisualizer.calculateSmoothness(), 3)
+            values.append(tsm)
 
-        
+        avg = sum(values) / len(values)
+
+        return self.calculateSmoothnessScore(value=avg)

@@ -1,8 +1,7 @@
-import pandas as pd
 import dash
+import plotly.express as px
 import plotly.graph_objs as go
 import dash_bootstrap_components as dbc
-import numpy as np
 from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output, State
@@ -46,7 +45,7 @@ if __name__ == '__main__':
                                 dbc.Col(html.Div(id="sm2", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})), dbc.Col(html.Div(id="sm3", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),
                                 dbc.Col(html.Div(id="sm4", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),dbc.Col(html.Div(id="smavg", children="-1",style={'margin-left':'7px', 'margin-top':'7px'}))]),
                             dbc.Row([
-                                dbc.Col(html.H5(children="Average Speed",style={'margin-left':'7px', 'margin-top':'7px'})), dbc.Col(html.Div(id="avgs1", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),
+                                dbc.Col(html.H5(children="Average Speed (m/s)",style={'margin-left':'7px', 'margin-top':'7px'})), dbc.Col(html.Div(id="avgs1", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),
                                 dbc.Col(html.Div(id="avgs2", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})), dbc.Col(html.Div(id="avgs3", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),
                                 dbc.Col(html.Div(id="avgs4", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),dbc.Col(html.Div(id="avgavg", children="-1",style={'margin-left':'7px', 'margin-top':'7px'}))]),
                             dbc.Row([
@@ -54,7 +53,7 @@ if __name__ == '__main__':
                                 dbc.Col(html.Div(id="r2", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})), dbc.Col(html.Div(id="r3", children="-1",style={'margin-left':'7px', 'margin-top':'7px'})),dbc.Col(html.Div(id="r4", children="-1",style={'margin-left':'7px', 'margin-top':'7px'}))
                             ]),
                             dbc.Row([
-                                dbc.Col(html.H2(children="Total Score", id = "totalScoreLvl3", style={'margin-left': '7px', 'margin-top': '7px'})),
+                                dbc.Col(html.H2(children="Movement Quality Score", id = "totalScoreLvl3", style={'margin-left': '7px', 'margin-top': '7px'})),
                                 dbc.Col(html.H2(children="Objects Completed", id = "objslvl3", style={'margin-left': '7px', 'margin-top': '7px'})),
                             ])
                         ]),
@@ -72,12 +71,12 @@ if __name__ == '__main__':
                                 dbc.Col(html.Div(id="sm2_lvl2", children="-1")),
                                 dbc.Col(html.Div(id="smavg_lvl2", children="-1"))]),
                             dbc.Row([
-                                dbc.Col(html.H5(children="Average Speed")),
+                                dbc.Col(html.H5(children="Average Speed (m/s)")),
                                 dbc.Col(html.Div(id="avgs1_lvl2", children="-1")),
                                 dbc.Col(html.Div(id="avgs2_lvl2", children="-1")),
                                 dbc.Col(html.Div(id="avgavg_lvl2", children="-1"))]),
                             dbc.Row([
-                                dbc.Col(html.H2(children="Total Score", id="totalScoreLvl2", style={'margin-left': '7px', 'margin-top': '7px'})),
+                                dbc.Col(html.H2(children="Movement Quality Score", id="totalScoreLvl2", style={'margin-left': '7px', 'margin-top': '7px'})),
                                 dbc.Col(html.H2(children="Objects Completed", id = "objslvl2", style={'margin-left': '7px', 'margin-top': '7px'})),
                             ])
                         ]),
@@ -96,13 +95,13 @@ if __name__ == '__main__':
                                 dbc.Col(html.Div(id="sm2_lvl1", children="-1")),
                                 dbc.Col(html.Div(id="smavg_lvl1", children="-1"))]),
                             dbc.Row([
-                                dbc.Col(html.H5(children="Average Speed")),
+                                dbc.Col(html.H5(children="Average Speed (m/s)")),
                                 dbc.Col(html.Div(id="avgs1_lvl1", children="-1")),
                                 dbc.Col(html.Div(id="avgs2_lvl1", children="-1")),
                                 dbc.Col(html.Div(id="avgavg_lvl1", children="-1"))
                             ]),
                             dbc.Row([
-                                dbc.Col(html.H2(children="Total Score", id="totalScoreLvl1", style={'margin-left': '7px', 'margin-top': '7px'})),
+                                dbc.Col(html.H2(children="Movement Quality Score", id="totalScoreLvl1", style={'margin-left': '7px', 'margin-top': '7px'})),
                                 dbc.Col(html.H2(children="Objects Completed", id = "objslvl1", style={'margin-left': '7px', 'margin-top': '7px'}))
                             ])
                         ])
@@ -127,19 +126,20 @@ if __name__ == '__main__':
                         dbc.Col(html.H3(id = "squareSm" , children="", style={'margin-left': '7px', 'margin-top': '7px'})),
                         dbc.Col(html.H3(id ="houseSm", children = "", style={'margin-left': '7px', 'margin-top': '7px'})),
                         dbc.Col(html.H3(id="smileySm", children="", style={'margin-left': '7px', 'margin-top': '7px'}))
+                    ]),
+                    dbc.Row([
+                        dbc.Col(html.H2(children="Movement Quality Score", id="totalScoreLvl4",
+                                        style={'margin-left': '7px', 'margin-top': '7px'})),
+                    ]),
+                    dbc.Row([
+                        dbc.Col(dcc.Graph(id="rainbow", style={'margin-left': '7px', 'margin-top': '3px'}, figure={})),
+                        dbc.Col(dcc.Graph(id="rainbowsm", style={'margin-left': '7px', 'margin-top': '3px'}, figure={}))
                     ])
                 ]),
-                dcc.Tab(label='Training', children=[
+                dcc.Tab(label='Training Progress', children=[
                     dbc.Row([
-                        dbc.Col(html.H3(children='''Exercise''')),dbc.Col(html.H3(children = "Average Smoothness")),dbc.Col(html.H3(children = "Time"))]),
-                    dbc.Row([
-                        dbc.Col(html.H5(children = "Apples")),
-                        dbc.Col(html.Div(id="appleAVG", children="-1")),
-                        dbc.Col(html.Div(id="appleTIME", children="-1"))]),
-                    dbc.Row([
-                        dbc.Col(html.H5(children="Drawing")), dbc.Col(html.Div(id="drawingAVG", children="-1")), dbc.Col(html.Div(id="drawingTIME", children="-1"))]),
-                    dbc.Row([
-                        dbc.Col(html.H5(children="Coffee")), dbc.Col(html.Div(id="coffeeAVG", children="-1")), dbc.Col(html.Div(id="coffeeTIME", children="-1"))])
+                        dbc.Col(dcc.Graph(id="progressFig", style={'margin-left': '7px', 'margin-top': '3px'}, figure={}))
+                    ])
                 ])
             ])]
         ,className="h-80")],
@@ -161,14 +161,22 @@ if __name__ == '__main__':
             times.append(str)
         return list, times
 
+    def getRBProgressFig(visualizer):
+        e, f, g, h, i = visualizer.sparcOnRainbow()
+
+        fig = make_subplots(rows=1, cols=1, subplot_titles="Movement")
+
+        fig.add_trace(go.Scatter(y=[e,f,g,h,i], mode='markers', marker=dict(size=7, color = [1,2,3,4,5],colorscale='Viridis')),
+                      row=1, col=1)
+        fig.update_layout(template="none")
+
+        return fig
+
     def get3DFig(visualizer, part):
-        x,y,z,t, color = visualizer.getAxesForPart(part)
-        """
-        x = visualizer.x_axis_r
-        y = visualizer.y_axis_r
-        z = visualizer.z_axis_r
-        t = visualizer.time
-        """
+        if(part != 7):
+            x,y,z,t, color = visualizer.getAxesForPart(part)
+        else:
+            x, y, z, t, color = visualizer.getAxesForRainbow()
         trace = go.Scatter3d(
             x=x, y=y, z=z, mode='markers', marker=dict(
                 size=3,
@@ -207,19 +215,43 @@ if __name__ == '__main__':
 
         return fig
 
+    def getProgressFigs(opts):
+        smoothnessScores = []
+        rangesleft = []
+        rangesright = []
+        rangesfront = []
+        rangesup = []
+
+        for i in opts:
+            visualizer = Visualizer()
+            visualizer.setArraysFromDB(visualizer.getDataFromDB(i))
+            r1, r2, r3, r4 = visualizer.getRangesDB(i)
+            visualizer.initializeVectors(True)
+            smoothnessScores.append(visualizer.getAverageSmoothness())
+            rangesleft.append(r1)
+            rangesright.append(r2)
+            rangesfront.append(r3)
+            rangesup.append(r4)
+
+        progressfig = make_subplots(rows=1, cols=2, subplot_titles=('Movement Quality (%)', 'Range (m)'))
+        progressfig.add_trace(go.Scatter(y=smoothnessScores, showlegend=False, mode='lines+markers',marker=dict(size=7, color=[1, 2, 3, 4, 5], colorscale='Viridis')),row=1, col=1)
+
+        progressfig.add_trace(go.Scatter(y=rangesleft, name="left", mode='lines+markers', marker=dict(size=4)), row=1, col=2)
+        progressfig.add_trace(go.Scatter(y=rangesright, name="right", mode='lines+markers', marker=dict(size=4)),row=1, col=2)
+        progressfig.add_trace(go.Scatter(y=rangesfront, name="front", mode='lines+markers', marker=dict(size=4)),row=1, col=2)
+        progressfig.add_trace(go.Scatter(y=rangesup, name="up", mode='lines+markers', marker=dict(size=4)),row=1, col=2)
+
+        progressfig.update_layout(template="none")
+
+        return progressfig
+
     def emptyReturn():
-        return -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, \
-                -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,-1,-1,-1
+        return -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,-1,-1,-1,-1
 
     @app.callback([Output('opt_dropdown','options'),
                    Output(component_id='exercise_plot', component_property='figure'),
+                   Output(component_id='progressFig', component_property='figure'),
                    Output(component_id='speed_plot', component_property='figure'),
-                   Output(component_id='drawingAVG', component_property='children'),
-                   Output(component_id='coffeeAVG', component_property='children'),
-                   Output(component_id='appleAVG', component_property='children'),
-                   Output(component_id='drawingTIME', component_property='children'),
-                   Output(component_id='appleTIME', component_property='children'),
-                   Output(component_id='coffeeTIME', component_property='children'),
                    Output(component_id='sm1', component_property='children'),
                    Output(component_id='sm2', component_property='children'),
                    Output(component_id='sm3', component_property='children'),
@@ -266,9 +298,12 @@ if __name__ == '__main__':
                    Output(component_id='squareSm', component_property='children'),
                    Output(component_id='houseSm', component_property='children'),
                    Output(component_id='smileySm', component_property='children'),
+                   Output(component_id='totalScoreLvl4', component_property='children'),
+                   Output(component_id='rainbow', component_property='figure'),
+                   Output(component_id='rainbowsm', component_property='figure'),
                    Output(component_id='painting1', component_property='figure'),
                    Output(component_id='painting2', component_property='figure'),
-                   Output(component_id='painting3', component_property='figure'),
+                   Output(component_id='painting3', component_property='figure')
 
                    ],
                   ([Input('submit-button', 'n_clicks')],[Input('opt_dropdown','value')]),
@@ -280,7 +315,7 @@ if __name__ == '__main__':
                 visualizer = Visualizer()
                 opts, times = getRunIDs(visualizer, username_value)
 
-                options = [{'label':times[i], 'value': opts[i]} for i in range(len(opts))]
+                options = [{'label':f"Run ID {opts[i]},{times[i]}", 'value': opts[i]} for i in range(len(opts))]
                 if runChosen[0] is not None:
                     visualizer.setArraysFromDB(visualizer.getDataFromDB(runChosen[0]))
                     r1,r2,r3,r4 = visualizer.getRangesDB(runChosen[0])
@@ -288,6 +323,8 @@ if __name__ == '__main__':
                     visualizer.setArraysFromDB(visualizer.getDataFromDB(opts[0]))
                     r1,r2,r3,r4 = visualizer.getRangesDB(opts[0])
                 visualizer.initializeVectors(True)
+
+                progressFig = getProgressFigs(opts)
 
                 # Kitchen Tab
                 olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothnessApples, avgSpeedApples, totalscoreApples = visualizer.sparcOnApples()
@@ -302,25 +339,33 @@ if __name__ == '__main__':
                 figSpeedlvl1 = getSpeedFig(visualizer, 1)
 
                 # Toolshed Tab
-                smsquare, smhouse, smsmiley = visualizer.sparcOnLvl4()
+                smsquare, smhouse, smsmiley,totalScoreLVL4 = visualizer.sparcOnLvl4()
                 fig3Dlvl4 = get3DFig(visualizer, 4)
                 fig3Dlvl5 = get3DFig(visualizer, 5)
                 fig3Dlvl6 = get3DFig(visualizer, 6)
+                fig3Drainbow = get3DFig(visualizer, 7)
 
                 # Training Tab
                 appleavg, coffeavg, drawingavg, appleTime, coffeetime, drawingtime = visualizer.getValues()
 
                 # Objects Completed
-                objslvl3 = f"Missions Completed = {4}/4"
-                objslvl2 = f"Missions Completed = {2}/2"
-                objslvl1 = f"Missions Completed = {2}/2"
+                a,b,c= visualizer.getObjectives()
+                objslvl3 = f"Missions Completed = {c}/4"
+                objslvl2 = f"Missions Completed = {b}/2"
+                objslvl1 = f"Missions Completed = {a}/2"
 
-                return options, fig3Dlvl3, figSpeedlvl3, drawingavg, coffeavg, appleavg, drawingtime, appleTime, \
-                    coffeetime, olsm, ilsm, orism, irsm, avgSmoothnessApples, olavg, ilavg, oriavg, iravg, avgSpeedApples,\
-                    f"Total Score = {totalscoreApples}",objslvl3, f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}",\
-                    crsm2, mssm2, avgSmoothnessLVL2, cravg2, msavg2, avgSpeedLVL2, fig3Dlvl2, figSpeedlvl2,f"Total Score = {totalscoreLVL2}",objslvl2, \
-                    cosm1, cksm1, avgSmoothnessLVL1, coavg1, ckavg1, avgSpeedLVL1, fig3Dlvl1, figSpeedlvl1, f"Total Score = {totalscoreLVL1}",objslvl1, \
-                    -1,-1,-1,smsquare,smhouse,smsmiley, fig3Dlvl4, fig3Dlvl5, fig3Dlvl6
+                # Painting Accuracies
+                a,b,c = visualizer.getAccDB()
+
+
+                e,f,g,h,i = visualizer.sparcOnRainbow()
+                figRBProgress = getRBProgressFig(visualizer)
+
+                return options, fig3Dlvl3, progressFig, figSpeedlvl3, olsm, ilsm, orism, irsm, avgSmoothnessApples, olavg, ilavg, oriavg, iravg, avgSpeedApples,\
+                    f"Movement Quality Score = {totalscoreApples}",objslvl3, f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}",\
+                    crsm2, mssm2, avgSmoothnessLVL2, cravg2, msavg2, avgSpeedLVL2, fig3Dlvl2, figSpeedlvl2,f"Movement Quality Score = {totalscoreLVL2}",objslvl2, \
+                    cosm1, cksm1, avgSmoothnessLVL1, coavg1, ckavg1, avgSpeedLVL1, fig3Dlvl1, figSpeedlvl1, f"Movement Quality Score = {totalscoreLVL1}",objslvl1, \
+                    a,b,c,smsquare,smhouse,smsmiley, f"Movement Quality Score = {totalScoreLVL4}", fig3Drainbow, figRBProgress, fig3Dlvl4, fig3Dlvl5, fig3Dlvl6
             except:
                 return emptyReturn()
         else:
