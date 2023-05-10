@@ -251,7 +251,7 @@ class Visualizer():
         print(sm)
         return sm
 
-    def sparcOnApples(self):
+    def sparcOnLvl3(self):
         ol = self.original_db[(self.original_db[14] == 6) & (self.original_db[13] == 3)].reset_index(drop=True)
         olVisualizer = Visualizer()
         olVisualizer.setArraysFromDB(db=ol)

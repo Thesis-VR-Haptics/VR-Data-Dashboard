@@ -1,5 +1,4 @@
 import dash
-import plotly.express as px
 import plotly.graph_objs as go
 import dash_bootstrap_components as dbc
 from dash import dcc
@@ -21,9 +20,7 @@ if __name__ == '__main__':
         dbc.Row(html.H1("VR Haptics Thesis Data", style={'text-align': 'center','margin-left':'7px', 'margin-top':'7px'}),className="h-10"),
         dbc.Row([
             dbc.Col(dcc.Input(id='username', placeholder='Fill in username here', type='text',style={'margin-left':'7px', 'margin-top':'7px'}), width = 3),
-            dbc.Col(html.Button(id='submit-button', type='submit', children='Submit'), width=2),
-            dbc.Col(dcc.RadioItems(id='controller', options=[' All ', ' Oculus Quest 2 Controllers ', ' Sense Glove '],
-                       value='All'), width = 4),
+            dbc.Col(html.Button(id='submit-button', type='submit', children='Submit'), width=4),
             dbc.Col(dcc.Dropdown(id="opt_dropdown",multi=False, style={'width': "100%"}), width = 3)
         ],className="h-10"),
         dbc.Row(
@@ -307,15 +304,14 @@ if __name__ == '__main__':
 
                    ],
                   ([Input('submit-button', 'n_clicks')],[Input('opt_dropdown','value')]),
-                  [State('username', 'value'), State('controller', 'value')],
+                  [State('username', 'value')],
                   )
-    def update_output(clicks, runChosen, username_value, controller_value):
+    def update_output(clicks, runChosen, username_value):
         if (clicks is not None and username_value is not None):
             try:
                 visualizer = Visualizer()
                 opts, times = getRunIDs(visualizer, username_value)
-
-                options = [{'label':f"Run ID {opts[i]},{times[i]}", 'value': opts[i]} for i in range(len(opts))]
+                options = [{'label':f"Run ID {str(opts[i])}, {times[i][7:12] }", 'value': opts[i]} for i in range(len(opts))]
                 if runChosen[0] is not None:
                     visualizer.setArraysFromDB(visualizer.getDataFromDB(runChosen[0]))
                     r1,r2,r3,r4 = visualizer.getRangesDB(runChosen[0])
@@ -324,42 +320,35 @@ if __name__ == '__main__':
                     r1,r2,r3,r4 = visualizer.getRangesDB(opts[0])
                 visualizer.initializeVectors(True)
 
-                progressFig = getProgressFigs(opts)
-
                 # Kitchen Tab
-                olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothnessApples, avgSpeedApples, totalscoreApples = visualizer.sparcOnApples()
-                crsm2, cravg2, mssm2, msavg2, avgSmoothnessLVL2, avgSpeedLVL2, totalscoreLVL2 = visualizer.sparcOnLvl2()
-                cksm1, ckavg1, cosm1, coavg1, avgSmoothnessLVL1, avgSpeedLVL1, totalscoreLVL1 = visualizer.sparcOnLvl1()
-
+                olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothnessApples, avgSpeedApples, totalscoreApples = visualizer.sparcOnLvl3()
                 fig3Dlvl3 = get3DFig(visualizer, 3)
-                fig3Dlvl2 = get3DFig(visualizer, 2)
-                fig3Dlvl1 = get3DFig(visualizer, 1)
                 figSpeedlvl3 = getSpeedFig(visualizer, 3)
+
+                crsm2, cravg2, mssm2, msavg2, avgSmoothnessLVL2, avgSpeedLVL2, totalscoreLVL2 = visualizer.sparcOnLvl2()
+                fig3Dlvl2 = get3DFig(visualizer, 2)
                 figSpeedlvl2 = getSpeedFig(visualizer, 2)
+
+                cksm1, ckavg1, cosm1, coavg1, avgSmoothnessLVL1, avgSpeedLVL1, totalscoreLVL1 = visualizer.sparcOnLvl1()
+                fig3Dlvl1 = get3DFig(visualizer, 1)
                 figSpeedlvl1 = getSpeedFig(visualizer, 1)
 
-                # Toolshed Tab
-                smsquare, smhouse, smsmiley,totalScoreLVL4 = visualizer.sparcOnLvl4()
-                fig3Dlvl4 = get3DFig(visualizer, 4)
-                fig3Dlvl5 = get3DFig(visualizer, 5)
-                fig3Dlvl6 = get3DFig(visualizer, 6)
-                fig3Drainbow = get3DFig(visualizer, 7)
-
-                # Training Tab
-                appleavg, coffeavg, drawingavg, appleTime, coffeetime, drawingtime = visualizer.getValues()
-
-                # Objects Completed
-                a,b,c= visualizer.getObjectives()
+                a, b, c = visualizer.getObjectives()
                 objslvl3 = f"Missions Completed = {c}/4"
                 objslvl2 = f"Missions Completed = {b}/2"
                 objslvl1 = f"Missions Completed = {a}/2"
 
-                # Painting Accuracies
-                a,b,c = visualizer.getAccDB()
-
-
-                e,f,g,h,i = visualizer.sparcOnRainbow()
+                # Painting Tab
+                smsquare, smhouse, smsmiley,totalScoreLVL4 = visualizer.sparcOnLvl4()
+                a, b, c = visualizer.getAccDB()
+                fig3Dlvl4 = get3DFig(visualizer, 4)
+                fig3Dlvl5 = get3DFig(visualizer, 5)
+                fig3Dlvl6 = get3DFig(visualizer, 6)
+                fig3Drainbow = get3DFig(visualizer, 7)
                 figRBProgress = getRBProgressFig(visualizer)
+
+                # Training Tab
+                progressFig = getProgressFigs(opts)
 
                 return options, fig3Dlvl3, progressFig, figSpeedlvl3, olsm, ilsm, orism, irsm, avgSmoothnessApples, olavg, ilavg, oriavg, iravg, avgSpeedApples,\
                     f"Movement Quality Score = {totalscoreApples}",objslvl3, f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}",\
