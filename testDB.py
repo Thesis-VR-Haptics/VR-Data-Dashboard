@@ -15,7 +15,7 @@ from Visualizer import Visualizer
 if __name__ == '__main__':
 
     def calculateSmoothness(self):
-        self.initializeVectors(True)
+        self.initializeVectors()
         time = self.time
 
         self.svUnity[self.svUnity == 0.0] = np.nan
@@ -32,7 +32,7 @@ if __name__ == '__main__':
         ol = visualizer.original_db[(visualizer.original_db[13] == part) & (visualizer.original_db[14] == 1)].reset_index(drop=True)
         olVisualizer = Visualizer()
         olVisualizer.setArraysFromDB(db=ol)
-        olVisualizer.initializeVectors(True)
+        olVisualizer.initializeVectors()
         color = olVisualizer.original_db.iloc[:, -1]
         plt.figure()
         plt.plot(olVisualizer.time[:-4], olVisualizer.speed_vector[:-4])
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     visualizer.setArraysFromDB(visualizer.getDataFromDB(89))
     r1, r2, r3, r4 = visualizer.getRangesDB(89)
-    visualizer.initializeVectors(True)
+    visualizer.initializeVectors()
 
     figSpeedlvl2, sVector = getSpeedFig(visualizer, 2)
     print(f"Smoothness smooth signal : {smoothness.sparc(sVector, 12)[0]}")

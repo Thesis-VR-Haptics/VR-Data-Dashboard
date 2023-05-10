@@ -191,7 +191,7 @@ if __name__ == '__main__':
         ol = visualizer.original_db[(visualizer.original_db[13] == part)].reset_index(drop=True)
         olVisualizer = Visualizer()
         olVisualizer.setArraysFromDB(db=ol)
-        olVisualizer.initializeVectors(True)
+        olVisualizer.initializeVectors()
         color = olVisualizer.original_db.iloc[:, -1]
         fig = make_subplots(
             rows=2, cols=1,
@@ -223,7 +223,7 @@ if __name__ == '__main__':
             visualizer = Visualizer()
             visualizer.setArraysFromDB(visualizer.getDataFromDB(i))
             r1, r2, r3, r4 = visualizer.getRangesDB(i)
-            visualizer.initializeVectors(True)
+            visualizer.initializeVectors()
             smoothnessScores.append(visualizer.getAverageSmoothness())
             rangesleft.append(r1)
             rangesright.append(r2)
@@ -318,7 +318,7 @@ if __name__ == '__main__':
                 else:
                     visualizer.setArraysFromDB(visualizer.getDataFromDB(opts[0]))
                     r1,r2,r3,r4 = visualizer.getRangesDB(opts[0])
-                visualizer.initializeVectors(True)
+                visualizer.initializeVectors()
 
                 # Kitchen Tab
                 olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothnessApples, avgSpeedApples, totalscoreApples = visualizer.sparcOnLvl3()
@@ -333,7 +333,7 @@ if __name__ == '__main__':
                 fig3Dlvl1 = get3DFig(visualizer, 1)
                 figSpeedlvl1 = getSpeedFig(visualizer, 1)
 
-                a, b, c = visualizer.getObjectives()
+                a, b, c = visualizer.getObjectivesDB()
                 objslvl3 = f"Missions Completed = {c}/4"
                 objslvl2 = f"Missions Completed = {b}/2"
                 objslvl1 = f"Missions Completed = {a}/2"
