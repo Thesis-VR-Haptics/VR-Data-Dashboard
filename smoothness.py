@@ -1,9 +1,3 @@
-"""
-Original code written by Sivakumar Balasubramanian.
-Link to git repository: https://github.com/siva82kb/SPARC
-
-"""
-
 import numpy as np
 
 def sparc(movement, fs, padlevel=4, fc=10.0, amp_th=0.05):

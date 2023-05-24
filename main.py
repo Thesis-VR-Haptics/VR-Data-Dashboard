@@ -1,4 +1,6 @@
 import dash
+import pandas as pd
+import plotly.express as px
 import plotly.graph_objs as go
 import dash_bootstrap_components as dbc
 from dash import dcc
@@ -20,7 +22,9 @@ if __name__ == '__main__':
         dbc.Row(html.H1("VR Haptics Thesis Data", style={'text-align': 'center','margin-left':'7px', 'margin-top':'7px'}),className="h-10"),
         dbc.Row([
             dbc.Col(dcc.Input(id='username', placeholder='Fill in username here', type='text',style={'margin-left':'7px', 'margin-top':'7px'}), width = 3),
-            dbc.Col(html.Button(id='submit-button', type='submit', children='Submit'), width=4),
+            dbc.Col(html.Button(id='submit-button', type='submit', children='Submit'), width=2),
+            dbc.Col(dcc.RadioItems(id='controller', options=[' All ', ' Oculus Quest 2 Controllers ', ' Sense Glove '],
+                       value='All'), width = 4),
             dbc.Col(dcc.Dropdown(id="opt_dropdown",multi=False, style={'width': "100%"}), width = 3)
         ],className="h-10"),
         dbc.Row(
@@ -191,12 +195,20 @@ if __name__ == '__main__':
         ol = visualizer.original_db[(visualizer.original_db[13] == part)].reset_index(drop=True)
         olVisualizer = Visualizer()
         olVisualizer.setArraysFromDB(db=ol)
-        olVisualizer.initializeVectors()
+        olVisualizer.initializeVectors(True)
         color = olVisualizer.original_db.iloc[:, -1]
+        if(int(visualizer.runID) == 140 and part==3):
+            one = ol.index[ol[14] == 6].tolist()
+            onedb = pd.DataFrame(olVisualizer.speed_vector[one])
+            onedb.to_csv("140_1.csv",index=False, decimal='.')
+            two = ol.index[ol[14] == 5]
+            twodb = pd.DataFrame(olVisualizer.speed_vector[two])
+            twodb.to_csv("140_2.csv", index=False, decimal='.')
+
         fig = make_subplots(
             rows=2, cols=1,
             shared_xaxes=True,
-            subplot_titles=('Position', 'Speed (m/s)'))
+            subplot_titles=('Position (X,Y,Z)', 'Speed (m/s)'))
 
         fig.add_trace(go.Scatter(x=olVisualizer.time, y=olVisualizer.x_axis_r, mode='markers', marker=dict(size=2)),
                       row=1, col=1)
@@ -223,12 +235,12 @@ if __name__ == '__main__':
             visualizer = Visualizer()
             visualizer.setArraysFromDB(visualizer.getDataFromDB(i))
             r1, r2, r3, r4 = visualizer.getRangesDB(i)
-            visualizer.initializeVectors()
-            smoothnessScores.append(visualizer.getAverageSmoothness())
-            rangesleft.append(r1)
-            rangesright.append(r2)
-            rangesfront.append(r3)
-            rangesup.append(r4)
+            visualizer.initializeVectors(True)
+            smoothnessScores.insert(0,visualizer.getAverageSmoothness())
+            rangesleft.insert(0,r1)
+            rangesright.insert(0,r2)
+            rangesfront.insert(0,r3)
+            rangesup.insert(0,r4)
 
         progressfig = make_subplots(rows=1, cols=2, subplot_titles=('Movement Quality (%)', 'Range (m)'))
         progressfig.add_trace(go.Scatter(y=smoothnessScores, showlegend=False, mode='lines+markers',marker=dict(size=7, color=[1, 2, 3, 4, 5], colorscale='Viridis')),row=1, col=1)
@@ -304,51 +316,61 @@ if __name__ == '__main__':
 
                    ],
                   ([Input('submit-button', 'n_clicks')],[Input('opt_dropdown','value')]),
-                  [State('username', 'value')],
+                  [State('username', 'value'), State('controller', 'value')],
                   )
-    def update_output(clicks, runChosen, username_value):
+    def update_output(clicks, runChosen, username_value, controller_value):
         if (clicks is not None and username_value is not None):
             try:
                 visualizer = Visualizer()
                 opts, times = getRunIDs(visualizer, username_value)
-                options = [{'label':f"Run ID {str(opts[i])}, {times[i][7:12] }", 'value': opts[i]} for i in range(len(opts))]
+
+                options = [{'label':f"Run ID {opts[i]},{times[i]}", 'value': opts[i]} for i in range(len(opts))]
                 if runChosen[0] is not None:
                     visualizer.setArraysFromDB(visualizer.getDataFromDB(runChosen[0]))
                     r1,r2,r3,r4 = visualizer.getRangesDB(runChosen[0])
+                    visualizer.runID=runChosen[0]
                 else:
                     visualizer.setArraysFromDB(visualizer.getDataFromDB(opts[0]))
                     r1,r2,r3,r4 = visualizer.getRangesDB(opts[0])
-                visualizer.initializeVectors()
+                    visualizer.runID=opts[0]
+                visualizer.initializeVectors(True)
+
+                progressFig = getProgressFigs(opts)
 
                 # Kitchen Tab
-                olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothnessApples, avgSpeedApples, totalscoreApples = visualizer.sparcOnLvl3()
-                fig3Dlvl3 = get3DFig(visualizer, 3)
-                figSpeedlvl3 = getSpeedFig(visualizer, 3)
-
+                olsm, ilsm, orism, irsm, olavg, ilavg, oriavg, iravg, avgSmoothnessApples, avgSpeedApples, totalscoreApples = visualizer.sparcOnApples()
                 crsm2, cravg2, mssm2, msavg2, avgSmoothnessLVL2, avgSpeedLVL2, totalscoreLVL2 = visualizer.sparcOnLvl2()
-                fig3Dlvl2 = get3DFig(visualizer, 2)
-                figSpeedlvl2 = getSpeedFig(visualizer, 2)
-
                 cksm1, ckavg1, cosm1, coavg1, avgSmoothnessLVL1, avgSpeedLVL1, totalscoreLVL1 = visualizer.sparcOnLvl1()
+
+                fig3Dlvl3 = get3DFig(visualizer, 3)
+                fig3Dlvl2 = get3DFig(visualizer, 2)
                 fig3Dlvl1 = get3DFig(visualizer, 1)
+                figSpeedlvl3 = getSpeedFig(visualizer, 3)
+                figSpeedlvl2 = getSpeedFig(visualizer, 2)
                 figSpeedlvl1 = getSpeedFig(visualizer, 1)
 
-                a, b, c = visualizer.getObjectivesDB()
-                objslvl3 = f"Missions Completed = {c}/4"
-                objslvl2 = f"Missions Completed = {b}/2"
-                objslvl1 = f"Missions Completed = {a}/2"
-
-                # Painting Tab
+                # Toolshed Tab
                 smsquare, smhouse, smsmiley,totalScoreLVL4 = visualizer.sparcOnLvl4()
-                a, b, c = visualizer.getAccDB()
                 fig3Dlvl4 = get3DFig(visualizer, 4)
                 fig3Dlvl5 = get3DFig(visualizer, 5)
                 fig3Dlvl6 = get3DFig(visualizer, 6)
                 fig3Drainbow = get3DFig(visualizer, 7)
-                figRBProgress = getRBProgressFig(visualizer)
 
                 # Training Tab
-                progressFig = getProgressFigs(opts)
+                appleavg, coffeavg, drawingavg, appleTime, coffeetime, drawingtime = visualizer.getValues()
+
+                # Objects Completed
+                a,b,c= visualizer.getObjectives()
+                objslvl3 = f"Missions Completed = {c}/4"
+                objslvl2 = f"Missions Completed = {b}/2"
+                objslvl1 = f"Missions Completed = {a}/2"
+
+                # Painting Accuracies
+                a,b,c = visualizer.getAccDB()
+
+
+                e,f,g,h,i = visualizer.sparcOnRainbow()
+                figRBProgress = getRBProgressFig(visualizer)
 
                 return options, fig3Dlvl3, progressFig, figSpeedlvl3, olsm, ilsm, orism, irsm, avgSmoothnessApples, olavg, ilavg, oriavg, iravg, avgSpeedApples,\
                     f"Movement Quality Score = {totalscoreApples}",objslvl3, f"Right: {r1}",f"Left: {r2}",f"Up: {r3}",f"Forward: {r4}",\
